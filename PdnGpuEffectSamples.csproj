@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <RootNamespace>PaintDotNet.Effects.Gpu.Samples</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="RippleTransform.Shader.ps_4_0.fxlib" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="RippleTransform.Shader.ps_4_0.cso" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="PaintDotNet.ComponentModel">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.ComponentModel.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Core">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Effects">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.Effects.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Fundamentals">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.Fundamentals.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Primitives">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.PropertySystem">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.PropertySystem.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Windows">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Windows.Core">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.Windows.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Windows.Framework">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.Windows.Framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="if NOT DEFINED VSINSTALLDIR call &quot;$(DevEnvDir)\..\Tools\VsDevCmd.bat&quot;&#xD;&#xA;&#xD;&#xA;call &quot;$(SolutionDir)\buildD2DHLSL.cmd&quot; 4_0 &quot;$(ProjectDir)&quot; RippleTransform.Shader.ps_4_0" />
+  </Target>
+</Project>
