@@ -5,6 +5,7 @@ using System;
 
 namespace PaintDotNet.Effects.Gpu.Samples;
 
+// Implements a custom Direct2D effect that hosts the RippleTransform.
 internal sealed class RippleEffect
     : CustomEffect<RippleEffect.Props, RippleEffect.Impl>
 {

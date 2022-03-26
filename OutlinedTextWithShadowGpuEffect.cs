@@ -19,11 +19,11 @@ namespace PaintDotNet.Effects.Gpu.Samples;
 // This sample shows how to:
 // * Get the list of font names from DirectWrite, and use it to populate an IndirectUI dropdown list control
 // * Create text format and text layout objects, and then create a geometry of the text outline
-// * Use that outline geometry to draw text with an outline (fill the geometry with a white brush, draw the geometry outline with a stroke width)
+// * Use that outline geometry to draw text with an outline (fill the geometry outline with a white brush, then draw the geometry outline with a stroke width)
 // * Use a Direct2D command list to store the commands for drawing the text
 // * Use the command list as an input to an effect graph
 // * Use the ShadowEffect and CompositeEffect to apply a drop shadow to the text
-// * Use the CompositeEffect so as to preserve the layer's 
+// * Use the CompositeEffect so as to preserve the original layer's contents
 internal sealed class OutlinedTextWithShadowGpuEffect
     : PropertyBasedGpuImageEffect
 {

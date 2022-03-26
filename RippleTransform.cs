@@ -5,6 +5,7 @@ using System;
 
 namespace PaintDotNet.Effects.Gpu.Samples;
 
+// Implements a Direct2D draw transform that executes the ripple shader
 internal sealed class RippleTransform
     : DrawTransform
 {
@@ -14,6 +15,8 @@ internal sealed class RippleTransform
     // The RippleTransform.Shader.ps_4_0.cso file is the resource, which is compiled during the .csproj's
     // pre-build event using buildD2DHLSL.cmd. The output files are the .fxlib and .cso files. The .fxlib
     // is not needed. The HLSL is the file you'd actually edit to modify the shader.
+    // You can derive from the PaintDotNet.Direct2D1.Shader class if you want to load your shader in a 
+    // different manner.
     internal sealed class Shader
         : AutoResourcePixelShader_4_0
     {
@@ -160,6 +163,8 @@ internal sealed class RippleTransform
         }
 
         outputRect = inputRects[0];
+
+        // Store the inputRect so we can use it later in MapInvalidRect
         this.inputRect = inputRects[0];
 
         // Indicate that entire output might contain transparency.
