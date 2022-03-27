@@ -117,7 +117,7 @@ internal sealed class RippleTransform
 
         // If this method is not used, nearest neighbor ("point") sampling is used. We want
         // higher quality sampling to produce a nicer looking output.
-        this.DrawInfo.SetInputDescription(0, Filter.Anisotropic, 0);
+        this.DrawInfo.SetInputDescription(0, Filter.MinMagMipLinear, 0);
 
         base.OnSetDrawInfo();
     }
