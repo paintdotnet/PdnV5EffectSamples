@@ -50,7 +50,7 @@ internal sealed class RainbowGpuEffect
 
     protected override void OnDraw(IDeviceContext dc)
     {
-        SizeInt32 size = this.EnvironmentParameters.SourceSurface.Size;
+        SizeInt32 size = this.SourceImageSize;
 
         // D2D1_GRADIENT_STOP: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/ns-d2d1-d2d1_gradient_stop
         GradientStopFloat[] gradientStops = new GradientStopFloat[361];
