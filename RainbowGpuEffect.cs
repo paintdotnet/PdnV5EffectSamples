@@ -71,10 +71,8 @@ internal sealed class RainbowGpuEffect
         // ID2D1LinearGradientBrush: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/nn-d2d1-id2d1lineargradientbrush
         // ID2D1RenderTarget::CreateLinearGradientBrush(): https://docs.microsoft.com/en-us/windows/win32/api/d2d1/nf-d2d1-id2d1rendertarget-createlineargradientbrush(constd2d1_linear_gradient_brush_properties__constd2d1_brush_properties__id2d1gradientstopcollection_id2d1lineargradientbrush)
         ILinearGradientBrush gradientBrush = dc.CreateLinearGradientBrush(
-            new LinearGradientBrushProperties(
-                new Point2Float(0, 0),
-                new Point2Float(size.Width, size.Height)),
-            null,
+            new Point2Float(0, 0),
+            new Point2Float(size.Width, size.Height),
             gradientStopCollection);
 
         // ID2D1RenderTarget::FillRectangle(): https://docs.microsoft.com/en-us/windows/win32/api/d2d1/nf-d2d1-id2d1rendertarget-fillrectangle(constd2d1_rect_f_id2d1brush)
