@@ -6,10 +6,8 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
-  <ItemGroup>
-    <None Remove="RippleTransform.Shader.ps_4_0.fxlib" />
-  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="RippleTransform.Shader.ps_4_0.cso" />
   </ItemGroup>
