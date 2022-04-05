@@ -61,11 +61,6 @@ internal sealed class ShadowAroundSelectionGpuEffect
 
     private IDeviceImage? selectionMaskImage;
 
-    protected override void OnSetDeviceContext(IDeviceContext deviceContext)
-    {
-        base.OnSetDeviceContext(deviceContext);
-    }
-
     protected override void OnInvalidateDeviceResources()
     {
         this.selectionMaskImage?.Dispose();
@@ -89,8 +84,13 @@ internal sealed class ShadowAroundSelectionGpuEffect
         // Retrieve the selection geometry and create a command list that draws a stroke outline of it
         // We can use the command list as an IDeviceImage that we plug into an effect (in this case, 
         // ShadowEffect)
+        // The geometry object is cached by the effect infrastructure, so it is only (potentially) expensive
+        // the first time it's retreived.
         IGeometry selectionGeometry = this.EnvironmentParameters.Selection.GetGeometry(deviceContext.Factory);
 
+        // The "passthrough effect" is used so we can set the Cached property to true, which should improve
+        // rendering performance. A filled geometry realization could also be used, but I have seen very
+        // mixed results from those, so I'm not using it here.
         PassthroughEffect selectionOutline = new PassthroughEffect(deviceContext);
         {
             ICommandList commandList = deviceContext.CreateCommandList();
@@ -123,9 +123,10 @@ internal sealed class ShadowAroundSelectionGpuEffect
         }
         else
         {
-            // Only create this if needed, otherwise consume the CPU time and memory for the bitmap and image
-            // This image doesn't change, and can be a bit expensive (CPU and memory), so it's important to
-            // re-use it across renderings (that is, when the user changes values in the effect's UI)
+            // Only create this if needed, otherwise don't consume the CPU time and memory for the bitmap and image.
+            // This bitmap doesn't change, and can be a bit expensive (CPU and memory), so it's important to re-use
+            // it across renderings (that is, when the user changes values in the effect's UI). The mask bitmap is
+            // cached by Paint.NET, so it's only expensive the first time it's used to create a device image.
             if (this.selectionMaskImage == null)
             {
                 IBitmapSource<ColorAlpha8> selectionMaskBitmap = this.EnvironmentParameters.Selection.GetClipMaskBitmap();
