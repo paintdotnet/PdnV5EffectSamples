@@ -20,9 +20,13 @@ internal sealed class RippleTransform
     internal sealed class Shader
         : AutoResourcePixelShader_4_0
     {
-    }
+        public static readonly Shader Instance = new Shader();
 
-    private readonly RippleTransform.Shader shader = new Shader();
+        private Shader()
+            : base(PixelOptions.None)
+        {
+        }
+    }
 
     private struct Constants
     {
@@ -40,7 +44,7 @@ internal sealed class RippleTransform
     public RippleTransform(IDeviceEffectContext effectContext)
         : base(effectContext)
     {
-        effectContext.LoadPixelShader(this.shader);
+        effectContext.LoadPixelShader(Shader.Instance);
     }
 
     public override int InputCount => 1;
@@ -113,7 +117,7 @@ internal sealed class RippleTransform
 
     protected override void OnSetDrawInfo()
     {
-        this.DrawInfo.SetPixelShader(this.shader);
+        this.DrawInfo.SetPixelShader(Shader.Instance);
 
         // If this method is not used, nearest neighbor ("point") sampling is used. We want
         // higher quality sampling to produce a nicer looking output.
@@ -127,6 +131,28 @@ internal sealed class RippleTransform
         this.DrawInfo.SetPixelShaderConstantBuffer(this.constants);
     }
 
+    public override void MapInputRectsToOutputRect(
+        ReadOnlySpan<RectInt32> inputRects,
+        ReadOnlySpan<RectInt32> inputOpaqueSubRects,
+        out RectInt32 outputRect,
+        out RectInt32 outputOpaqueSubRect)
+    {
+        // This effect has exactly one input, so if there is more than one input rect,
+        // something is wrong.
+        if (inputRects.Length != 1)
+        {
+            throw new ArgumentException();
+        }
+
+        outputRect = inputRects[0];
+
+        // Store the inputRect so we can use it later in MapInvalidRect
+        this.inputRect = inputRects[0];
+
+        // Indicate that entire output might contain transparency.
+        outputOpaqueSubRect = RectInt32.Zero;
+    }
+    
     // Calculates the mapping between the output and input rects. In this case,
     // we want to request an expanded region to account for pixels that the ripple
     // may need outside of the bounds of the destination.
@@ -147,28 +173,6 @@ internal sealed class RippleTransform
             SafeAdd(outputRect.Top, -expansion),
             SafeAdd(outputRect.Right, expansion),
             SafeAdd(outputRect.Bottom, expansion));
-    }
-
-    public override void MapInputRectsToOutputRect(
-        ReadOnlySpan<RectInt32> inputRects, 
-        ReadOnlySpan<RectInt32> inputOpaqueSubRects, 
-        out RectInt32 outputRect, 
-        out RectInt32 outputOpaqueSubRect)
-    {
-        // This effect has exactly one input, so if there is more than one input rect,
-        // something is wrong.
-        if (inputRects.Length != 1)
-        {
-            throw new ArgumentException();
-        }
-
-        outputRect = inputRects[0];
-
-        // Store the inputRect so we can use it later in MapInvalidRect
-        this.inputRect = inputRects[0];
-
-        // Indicate that entire output might contain transparency.
-        outputOpaqueSubRect = RectInt32.Zero;
     }
 
     public override void MapInvalidRect(int inputIndex, RectInt32 invalidInputRect, out RectInt32 invalidOutputRect)

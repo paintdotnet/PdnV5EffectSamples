@@ -160,8 +160,8 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         CompositeEffect compositeEffect = new CompositeEffect(deviceContext);
         compositeEffect.Properties.Mode.SetValue(CompositeMode.SourceOver);
         compositeEffect.Properties.Destination.Set(this.SourceImage); // use original layer contents as background
-        compositeEffect.Properties.Source[0].Set(shadowEffect);
-        compositeEffect.Properties.Source[1].Set(cachedTextImage);
+        compositeEffect.Properties.Sources.Add(shadowEffect);
+        compositeEffect.Properties.Sources.Add(cachedTextImage);
 
         return compositeEffect;
     }

@@ -64,7 +64,7 @@ internal sealed class DropShadowGpuEffect
         
         CompositeEffect compositeEffect = new CompositeEffect(deviceContext);
         compositeEffect.Properties.Destination.Set(shadowEffect);
-        compositeEffect.Properties.Source[0].Set(this.SourceImage);
+        compositeEffect.Properties.Sources.Add(this.SourceImage);
         compositeEffect.Properties.Mode.SetValue(CompositeMode.SourceOver);
 
         return compositeEffect;
