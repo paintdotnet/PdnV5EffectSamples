@@ -91,12 +91,10 @@ internal class RippleGpuEffect
         this.amplitude = newToken.GetProperty<DoubleProperty>(PropertyNames.Amplitude).Value;
         this.spread = newToken.GetProperty<DoubleProperty>(PropertyNames.Spread).Value;
 
-        Pair<double, double> center = newToken.GetProperty<DoubleVectorProperty>(PropertyNames.Center).Value;
-        double centerX = center.First;
-        double centerY = center.Second;
+        Vector2Double center = newToken.GetProperty<DoubleVectorProperty>(PropertyNames.Center).Value;
         this.centerPoint = new Point2Double(
-            (width + (centerX * width)) / 2.0,
-            (height + (centerY * height)) / 2.0);
+            (width + (center.X * width)) / 2.0,
+            (height + (center.Y * height)) / 2.0);
 
         this.quality = newToken.GetProperty<Int32Property>(PropertyNames.Quality).Value;
 

@@ -130,8 +130,8 @@ internal sealed class OutlinedTextWithShadowGpuEffect
 
         IGeometry textGeometry = d2dFactory.CreateGeometryFromTextLayout(textLayout, Point2Float.Zero);
 
-        ICommandList commandList = deviceContext.CreateCommandList();
-        using (deviceContext.UseTarget(commandList))
+        ICommandList textImage = deviceContext.CreateCommandList();
+        using (deviceContext.UseTarget(textImage))
         using (deviceContext.UseBeginDraw())
         {
             ISolidColorBrush blackBrush = deviceContext.CreateSolidColorBrush(Colors.Black);
@@ -144,16 +144,10 @@ internal sealed class OutlinedTextWithShadowGpuEffect
                 deviceContext.DrawGeometry(textGeometry, blackBrush, this.outlineThickness);
             }
         }
-        commandList.Close();
-
-        // The passthrough effect is used to cache the rasterization of the text
-        // Text and geometry involve a lot of processing on the CPU, and this can help performance
-        PassthroughEffect cachedTextImage = new PassthroughEffect(deviceContext);
-        cachedTextImage.Properties.Input.Set(commandList);
-        cachedTextImage.Properties.Cached.SetValue(true);
+        textImage.Close();
 
         ShadowEffect shadowEffect = new ShadowEffect(deviceContext);
-        shadowEffect.Properties.Input.Set(cachedTextImage);
+        shadowEffect.Properties.Input.Set(textImage);
         shadowEffect.Properties.Optimization.SetValue(ShadowOptimization.Quality);
         shadowEffect.Properties.BlurStandardDeviation.SetValue(StandardDeviation.FromRadius(this.shadowBlurRadius));
 
@@ -161,7 +155,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         compositeEffect.Properties.Mode.SetValue(CompositeMode.SourceOver);
         compositeEffect.Properties.Destination.Set(this.SourceImage); // use original layer contents as background
         compositeEffect.Properties.Sources.Add(shadowEffect);
-        compositeEffect.Properties.Sources.Add(cachedTextImage);
+        compositeEffect.Properties.Sources.Add(textImage);
 
         return compositeEffect;
     }

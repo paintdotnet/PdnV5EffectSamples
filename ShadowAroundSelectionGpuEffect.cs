@@ -88,26 +88,17 @@ internal sealed class ShadowAroundSelectionGpuEffect
         // the first time it's retreived.
         IGeometry selectionGeometry = this.EnvironmentParameters.Selection.GetGeometry(deviceContext.Factory);
 
-        // The "passthrough effect" is used so we can set the Cached property to true, which should improve
-        // rendering performance. A filled geometry realization could also be used, but I have seen very
-        // mixed results from those, so I'm not using it here.
-        PassthroughEffect selectionOutline = new PassthroughEffect(deviceContext);
+        ICommandList selectionOutline = deviceContext.CreateCommandList();
+        using (deviceContext.UseTarget(selectionOutline))
         {
-            ICommandList commandList = deviceContext.CreateCommandList();
-            using (deviceContext.UseTarget(commandList))
+            using (deviceContext.UseBeginDraw())
             {
-                using (deviceContext.UseBeginDraw())
-                {
-                    deviceContext.Clear();
-                    ISolidColorBrush brush = deviceContext.CreateSolidColorBrush(Colors.Black);
-                    deviceContext.DrawGeometry(selectionGeometry, brush, this.blurRadius / 2.0f);
-                }
-
-                commandList.Close();
+                deviceContext.Clear();
+                ISolidColorBrush brush = deviceContext.CreateSolidColorBrush(Colors.Black);
+                deviceContext.DrawGeometry(selectionGeometry, brush, this.blurRadius / 2.0f);
             }
 
-            selectionOutline.Properties.Input.Set(commandList);
-            selectionOutline.Properties.Cached.SetValue(true);
+            selectionOutline.Close();
         }
 
         // Create a shadow effect that will blur the image of the stroked geometry outline
@@ -129,7 +120,7 @@ internal sealed class ShadowAroundSelectionGpuEffect
             // cached by Paint.NET, so it's only expensive the first time it's used to create a device image.
             if (this.selectionMaskImage == null)
             {
-                IBitmapSource<ColorAlpha8> selectionMaskBitmap = this.EnvironmentParameters.Selection.GetClipMaskBitmap();
+                IBitmapSource<ColorAlpha8> selectionMaskBitmap = this.EnvironmentParameters.Selection.GetMaskBitmap();
                 this.selectionMaskImage = deviceContext.CreateImageFromBitmap(selectionMaskBitmap);
             }
 

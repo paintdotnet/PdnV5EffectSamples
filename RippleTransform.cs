@@ -1,50 +1,74 @@
-﻿using PaintDotNet.Direct2D1;
+﻿using ComputeSharp;
+using ComputeSharp.D2D1;
+using ComputeSharp.D2D1.Interop;
+using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
 using PaintDotNet.Rendering;
 using System;
+using System.Runtime.CompilerServices;
 
 namespace PaintDotNet.Effects.Gpu.Samples;
 
-// Implements a Direct2D draw transform that executes the ripple shader
-internal sealed class RippleTransform
+internal sealed partial class RippleTransform
     : DrawTransform
 {
-    // This derives from a special class that handles loading an embedded resource with the same name as
-    // this class, with the appropriate file extension appended. See doc comments for the base classes
-    // for more info.
-    // The RippleTransform.Shader.ps_4_0.cso file is the resource, which is compiled during the .csproj's
-    // pre-build event using buildD2DHLSL.cmd. The output files are the .fxlib and .cso files. The .fxlib
-    // is not needed. The HLSL is the file you'd actually edit to modify the shader.
-    // You can derive from the PaintDotNet.Direct2D1.Shader class if you want to load your shader in a 
-    // different manner.
-    internal sealed class Shader
-        : AutoResourcePixelShader_4_0
+    [D2DInputCount(1)]
+    [D2DInputComplex(0)]
+    [D2DRequiresScenePosition]
+    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader40)]
+    [AutoConstructor]
+    private readonly partial struct Shader
+        : ID2D1PixelShader
     {
-        public static readonly Shader Instance = new Shader();
-
-        private Shader()
-            : base(PixelOptions.None)
+        public struct Constants
         {
+            public float size;
+            public float frequency;
+            public float phase;
+            public float amplitude;
+            public float spread;
+            public float2 center;
+        }
+
+        private readonly Constants constants;
+
+        public float4 Execute()
+        {
+            float2 toPixel = D2D.GetScenePosition().XY - this.constants.center;
+
+            // Scale distance such that the ripple's displacement decays to 0 at the requested size (in pixels)
+            float distance = Hlsl.Length(toPixel * (1.0f / this.constants.size));
+            float2 direction = Hlsl.Normalize(toPixel);
+
+            float2 wave = default;
+            Hlsl.SinCos(this.constants.frequency * distance + this.constants.phase, out wave.X, out wave.Y);
+
+            // Clamp the falloff value so that the ripple does not extend beyond the limit.
+            // Spread controls how quickly the ripple decays, up to the limit.
+            float falloff = Hlsl.Saturate(1.0f - distance);
+            falloff = Hlsl.Pow(falloff, 1.0f / this.constants.spread);
+
+            // Calculate new mapping coordinates based on the frequency, center, and amplitude.
+            float2 inputOffset = (wave.X * falloff * this.constants.amplitude) * direction;
+            float lighting = Hlsl.Lerp(1.0f, 1.0f + wave.X * falloff * 0.2f, Hlsl.Saturate(this.constants.amplitude / 20.0f));
+
+            // Resample the image based on the new coordinates.
+            float4 color = D2D.SampleInputAtOffset(0, inputOffset);
+            color.RGB *= lighting;
+
+            return color;
         }
     }
 
-    private struct Constants
-    {
-        public float size;
-        public float frequency;
-        public float phase;
-        public float amplitude;
-        public float spread;
-        public Point2Float center;
-    }
-
-    private Constants constants;
+    private Shader.Constants constants;
     private RectInt32 inputRect;
 
     public RippleTransform(IDeviceEffectContext effectContext)
         : base(effectContext)
     {
-        effectContext.LoadPixelShader(Shader.Instance);
+        effectContext.LoadPixelShader(
+            typeof(Shader).GUID,
+            D2D1InteropServices.LoadShaderBytecode<Shader>());
     }
 
     public override int InputCount => 1;
@@ -106,18 +130,18 @@ internal sealed class RippleTransform
 
     public Point2Float Center
     {
-        get => this.constants.center;
+        get => Unsafe.As<float2, Point2Float>(ref this.constants.center);
 
         set
         {
-            this.constants.center = value;
+            this.constants.center = Unsafe.As<Point2Float, float2>(ref value);
             UpdateConstants();
         }
     }
 
     protected override void OnSetDrawInfo()
     {
-        this.DrawInfo.SetPixelShader(Shader.Instance);
+        this.DrawInfo.SetPixelShader(typeof(Shader).GUID, PixelOptions.None);
 
         // If this method is not used, nearest neighbor ("point") sampling is used. We want
         // higher quality sampling to produce a nicer looking output.
@@ -128,7 +152,8 @@ internal sealed class RippleTransform
 
     private void UpdateConstants()
     {
-        this.DrawInfo.SetPixelShaderConstantBuffer(this.constants);
+        this.DrawInfo.SetPixelShaderConstantBuffer(
+            D2D1InteropServices.GetPixelShaderConstantBufferForD2D1DrawInfo(new Shader(this.constants)));
     }
 
     public override void MapInputRectsToOutputRect(
