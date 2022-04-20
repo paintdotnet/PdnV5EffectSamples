@@ -38,15 +38,13 @@ internal sealed partial class ZonePlateEffect
 
     private enum PropertyNames
     {
-        ZonePlateScale,
-        DisplacementScale
+        ZonePlateScale
     }
 
     protected override PropertyCollection OnCreatePropertyCollection()
     {
         List<Property> properties = new List<Property>();
         properties.Add(new DoubleProperty(PropertyNames.ZonePlateScale, 1.0, 0.0, 2.0));
-        properties.Add(new DoubleProperty(PropertyNames.DisplacementScale, 25, 0, 1000));
         return new PropertyCollection(properties);
     }
 
