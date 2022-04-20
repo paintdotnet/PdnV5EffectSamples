@@ -1,5 +1,12 @@
-﻿// Ported from Windows SDK sample: https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/D2DCustomEffects/cpp/PixelShader
+﻿// This advanced sample shows how to implement and use a custom HLSL pixel shader.
+// The shader is implemented using ComputeSharp.D2D1, and wrapped in a PixelShaderEffect (also supplied by
+// ComputeSharp.D2D1).
+//
+// Ported from Windows SDK sample: https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/D2DCustomEffects/cpp/PixelShader
 
+using ComputeSharp;
+using ComputeSharp.D2D1;
+using ComputeSharp.D2D1.Interop;
 using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
 using PaintDotNet.IndirectUI;
@@ -7,26 +14,14 @@ using PaintDotNet.PropertySystem;
 using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace PaintDotNet.Effects.Gpu.Samples;
 
-// This advanced sample shows how to implement and use a custom HLSL pixel shader.
-// This class provides the Paint.NET-side implementation for an effect.
-// RippleEffect is the Direct2D custom effect that is used as the IDeviceImage "output" for the GpuImageEffect.
-// It contains a "Props" class that declares the properties that are set by the consumer (in this case,
-// RippleGpuEffect), and an "Impl" class that is used internally by Direct2D. The Impl class creates the
-// transform nodes (in this case, only RippleTransform) and initializes the transform graph.
-// RippleTransform is the transform node inside the effect transform graph, which loads the pixel shader and
-// marshals the property values into it.
-// Note that it's possible for the effect "Impl" class to also implement IDrawTransform, which permits you to
-// merge the RippleTransform and RippleEffect.Impl classes. Structuring things this way makes it clearer how
-// to expand beyond having just 1 transform node in the graph. It also makes it possible to reuse the
-// transform in other effects. You can also convert an effect to a transform node using
-// IDeviceEffectContext.CreateTransformNodeFromEffect(), so it's not necessary to do things this way --
-// effects can be stitched together within other effects, in other words.
-//
-// The Direct2D code is based on the Windows SDK sample: https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/D2DCustomEffects
-internal class RippleGpuEffect
+// Disambiguate between System.Drawing.IDeviceContext and PaintDotNet.Direct2D1.IDeviceContext
+using IDeviceContext = PaintDotNet.Direct2D1.IDeviceContext;
+
+internal sealed partial class RippleGpuEffect
     : PropertyBasedGpuImageEffect
 {
     public RippleGpuEffect()
@@ -61,7 +56,7 @@ internal class RippleGpuEffect
         properties.Add(new DoubleProperty(PropertyNames.Phase, 0, -100, +100));
         properties.Add(new DoubleProperty(PropertyNames.Amplitude, 100, 0.0001, 1000.0));
         properties.Add(new DoubleProperty(PropertyNames.Spread, 1, 0.0001, 100));
-        properties.Add(new DoubleVectorProperty(PropertyNames.Center, Pair.Create(0.0, 0.0), Pair.Create(-1.0, -1.0), Pair.Create(+1.0, +1.0)));
+        properties.Add(new DoubleVectorProperty(PropertyNames.Center, new Vector2Double(0, 0), new Vector2Double(-1.0, -1.0), new Vector2Double(+1.0, +1.0)));
         properties.Add(new Int32Property(PropertyNames.Quality, 2, 1, 3));
 
         return new PropertyCollection(properties);
@@ -101,6 +96,7 @@ internal class RippleGpuEffect
         base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
     }
 
+    private Guid effectID;
     private double sizePx;
     private double frequency;
     private double phase;
@@ -109,10 +105,20 @@ internal class RippleGpuEffect
     private int quality;
     private Point2Double centerPoint;
 
+    protected override void OnSetDeviceContext(IDeviceContext deviceContext)
+    {
+        // Register a PixelShaderEffect for this shader. The PixelShaderEffect must be registered once per shader.
+        deviceContext.Factory.RegisterEffectFromBlob(D2D1InteropServices.GetPixelShaderEffectRegistrationBlob(
+            () => new ShaderTransformMapper(),
+            out this.effectID));
+
+        base.OnSetDeviceContext(deviceContext);
+    }
+
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
         // Produce a higher quality output by rendering at a higher resolution and then downsampling
-        // Note that this is a very bruteforce way of improving rendering quality, and be be extremely
+        // Note that this is a very bruteforce way of improving rendering quality, and can be extremely
         // slow at the highest setting on large images.
         int scale;
         ScaleInterpolationMode scaleUpInterpolation;
@@ -156,17 +162,20 @@ internal class RippleGpuEffect
             sourceImage = scaleUpEffect;
         }
 
-        RippleEffect rippleEffect = new RippleEffect(deviceContext);
-        rippleEffect.Properties.Input.Set(sourceImage);
-        rippleEffect.Properties.Size.SetValue((float)this.sizePx * scale);
-        rippleEffect.Properties.Frequency.SetValue((float)this.frequency);
-        rippleEffect.Properties.Phase.SetValue((float)this.phase);
-        rippleEffect.Properties.Amplitude.SetValue((float)(this.amplitude * scale));
-        rippleEffect.Properties.Spread.SetValue((float)this.spread);
-        rippleEffect.Properties.Center.SetValue(
-            new Point2Float(
-                (float)(this.centerPoint.X * scale),
-                (float)(this.centerPoint.Y * scale)));
+        IDeviceEffect rippleEffect = deviceContext.CreateEffect(this.effectID);
+        rippleEffect.SetInput(0, sourceImage);
+        rippleEffect.SetValue(
+            0, // TODO: there should be a PixelShaderEffectProperties.ConstantBuffer or something
+            PropertyType.Blob,
+            D2D1InteropServices.GetPixelShaderConstantBufferForD2D1DrawInfo(new Shader(
+                (float)this.sizePx * scale,
+                (float)this.frequency,
+                (float)this.phase,
+                (float)(this.amplitude * scale),
+                (float)this.spread,
+                new float2(
+                    (float)this.centerPoint.X * scale,
+                    (float)this.centerPoint.Y * scale))).Span);
 
         if (scale == 1)
         {
@@ -181,6 +190,108 @@ internal class RippleGpuEffect
             scaleDownEffect.Properties.BorderMode.SetValue(BorderMode.Soft);
 
             return scaleDownEffect;
+        }
+    }
+
+    [D2DInputCount(1)]
+    [D2DInputComplex(0)]
+    [D2DRequiresScenePosition]
+    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader40)]
+    [AutoConstructor]
+    private readonly partial struct Shader
+        : ID2D1PixelShader
+    {
+        public readonly float size;
+        public readonly float frequency;
+        public readonly float phase;
+        public readonly float amplitude;
+        public readonly float spread;
+        public readonly float2 center;
+
+        public float4 Execute()
+        {
+            float2 toPixel = D2D.GetScenePosition().XY - this.center;
+
+            // Scale distance such that the ripple's displacement decays to 0 at the requested size (in pixels)
+            float distance = Hlsl.Length(toPixel * (1.0f / this.size));
+            float2 direction = Hlsl.Normalize(toPixel);
+
+            float2 wave = default;
+            Hlsl.SinCos(this.frequency * distance + this.phase, out wave.X, out wave.Y);
+
+            // Clamp the falloff value so that the ripple does not extend beyond the limit.
+            // Spread controls how quickly the ripple decays, up to the limit.
+            float falloff = Hlsl.Saturate(1.0f - distance);
+            falloff = Hlsl.Pow(falloff, 1.0f / this.spread);
+
+            // Calculate new mapping coordinates based on the frequency, center, and amplitude.
+            float2 inputOffset = (wave.X * falloff * this.amplitude) * direction;
+            float lighting = Hlsl.Lerp(1.0f, 1.0f + wave.X * falloff * 0.2f, Hlsl.Saturate(this.amplitude / 20.0f));
+
+            // Resample the image based on the new coordinates.
+            float4 color = D2D.SampleInputAtOffset(0, inputOffset);
+            color.RGB *= lighting;
+
+            return color;
+        }
+    }
+
+    private sealed class ShaderTransformMapper
+        : ID2D1TransformMapper<Shader>
+    {
+        private RectInt32 inputRect;
+
+        public void MapInputsToOutput(
+            in Shader shader, 
+            ReadOnlySpan<Rectangle> inputs, 
+            ReadOnlySpan<Rectangle> opaqueInputs, 
+            out Rectangle output, 
+            out Rectangle opaqueOutput)
+        {
+            output = inputs[0];
+
+            // Store the inputRect so we can use it later in MapInvalidRect
+            this.inputRect = inputs[0];
+
+            // Indicate that entire output might contain transparency.
+            opaqueOutput = RectInt32.Zero;
+        }
+
+        public void MapInvalidOutput(
+            in Shader shader, 
+            int inputIndex, 
+            Rectangle invalidInput, 
+            out Rectangle invalidOutput)
+        {
+            // Indicate that the entire output may be invalid.
+            invalidOutput = this.inputRect;
+        }
+
+        public void MapOutputToInputs(
+            in Shader shader, 
+            in Rectangle output, 
+            Span<Rectangle> inputs)
+        {
+            // TODO: i'm not sure these calculations are actually correct
+
+            int expansion = 2 * (int)Round(shader.amplitude);
+
+            // Expand the rect out by the amplitude of the ripple animation.
+            inputs[0] = RectInt32.FromEdges(
+                SafeAdd(output.Left, -expansion),
+                SafeAdd(output.Top, -expansion),
+                SafeAdd(output.Right, expansion),
+                SafeAdd(output.Bottom, expansion));
+        }
+
+        private static float Round(float v)
+        {
+            return MathF.Floor(v + 0.5f);
+        }
+
+        private static int SafeAdd(int baseValue, int valueToAdd)
+        {
+            return (int)Math.Clamp((long)baseValue + valueToAdd, int.MinValue, int.MaxValue);
         }
     }
 }
