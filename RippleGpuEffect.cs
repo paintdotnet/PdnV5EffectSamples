@@ -108,7 +108,7 @@ internal sealed partial class RippleGpuEffect
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
     {
         // Register a PixelShaderEffect for this shader. The PixelShaderEffect must be registered once per shader.
-        deviceContext.Factory.RegisterEffectFromBlob(D2D1InteropServices.GetPixelShaderEffectRegistrationBlob(
+        deviceContext.Factory.RegisterEffectFromBlob(D2D1PixelShaderEffect.GetRegistrationBlob(
             () => new ShaderTransformMapper(),
             out this.effectID));
 

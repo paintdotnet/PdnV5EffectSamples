@@ -70,7 +70,7 @@ internal sealed partial class ZonePlateEffect
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
     {
         deviceContext.Factory.RegisterEffectFromBlob(
-            D2D1InteropServices.GetPixelShaderEffectRegistrationBlob<Shader, ShaderTransformMapper>(out this.shaderEffectID));
+            D2D1PixelShaderEffect.GetRegistrationBlob<Shader, ShaderTransformMapper>(out this.shaderEffectID));
 
         base.OnSetDeviceContext(deviceContext);
     }
