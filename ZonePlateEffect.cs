@@ -38,13 +38,13 @@ internal sealed partial class ZonePlateEffect
 
     private enum PropertyNames
     {
-        ZonePlateScale
+        Scale
     }
 
     protected override PropertyCollection OnCreatePropertyCollection()
     {
         List<Property> properties = new List<Property>();
-        properties.Add(new DoubleProperty(PropertyNames.ZonePlateScale, 1.0, 0.0, 2.0));
+        properties.Add(new DoubleProperty(PropertyNames.Scale, 1.0, 0.0, 2.0));
         return new PropertyCollection(properties);
     }
 
@@ -54,10 +54,10 @@ internal sealed partial class ZonePlateEffect
 
     protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken, RenderArgs dstArgs, RenderArgs srcArgs)
     {
-        double zonePlateScale = newToken.GetProperty<DoubleProperty>(PropertyNames.ZonePlateScale).Value;
+        double scale = newToken.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
         SizeInt32 sourceImageSize = this.SourceImageSize;
-        double diameter = (Math.Min(sourceImageSize.Width, sourceImageSize.Height) & ~1) * zonePlateScale;
-        this.shader = new Shader(sourceImageSize.Width, sourceImageSize.Height, (float)diameter);
+        double diameter = (Math.Min(sourceImageSize.Width, sourceImageSize.Height) & ~1) * scale;
+        this.shader = new Shader(new int2(sourceImageSize.Width, sourceImageSize.Height), (float)diameter);
        
         base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
     }
@@ -70,7 +70,7 @@ internal sealed partial class ZonePlateEffect
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
     {
         deviceContext.Factory.RegisterEffectFromBlob(
-            D2D1PixelShaderEffect.GetRegistrationBlob<Shader, ShaderTransformMapper>(out this.shaderEffectID));
+            D2D1PixelShaderEffect.GetRegistrationBlob<Shader>(out this.shaderEffectID));
 
         base.OnSetDeviceContext(deviceContext);
     }
@@ -106,16 +106,15 @@ internal sealed partial class ZonePlateEffect
     private readonly partial struct Shader
         : ID2D1PixelShader
     {
-        private readonly int width;
-        private readonly int height;
+        private readonly int2 size;
         private readonly float diameter;
 
         public float4 Execute()
         {
             float2 scenePos = D2D.GetScenePosition().XY;
 
-            float xo = scenePos.X - (this.width >> 1);
-            float yo = scenePos.Y - (this.height >> 1);
+            float xo = scenePos.X - (this.size.X >> 1);
+            float yo = scenePos.Y - (this.size.Y >> 1);
 
             float rm = 0.5f * this.diameter;
             float km = 0.7f / this.diameter * MathF.PI;
@@ -125,31 +124,9 @@ internal sealed partial class ZonePlateEffect
             float xd = xo * xo;
             float d = xd + yd;
             float v = 1.0f + (1.0f + Hlsl.Tanh((rm - Hlsl.Sqrt(d)) / w)) * Hlsl.Sin(km * d) * 0.5f;
+            float vo = v * 0.5f;
 
-            return new Float4(v, v, v, 1.0f);
-        }
-    }
-
-    // TODO: BUG in CS.D2D1. This "default" mapper shouldn't be necessary for an output-only pixel shader with no clip rect.
-    private sealed class ShaderTransformMapper
-        : ID2D1TransformMapper<Shader>
-    {
-        public void MapInputsToOutput(in Shader shader, ReadOnlySpan<Rectangle> inputs, ReadOnlySpan<Rectangle> opaqueInputs, out Rectangle output, out Rectangle opaqueOutput)
-        {
-            output = default;
-            output.ToD2D1Infinite();
-
-            opaqueOutput = default;
-        }
-
-        public void MapInvalidOutput(in Shader shader, int inputIndex, Rectangle invalidInput, out Rectangle invalidOutput)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void MapOutputToInputs(in Shader shader, in Rectangle output, Span<Rectangle> inputs)
-        {
-            throw new NotImplementedException();
+            return new float4(vo, vo, vo, 1.0f);
         }
     }
 }
