@@ -27,7 +27,7 @@ internal sealed partial class ZonePlateShaderEffect
 {
     public ZonePlateShaderEffect()
         : base(
-            "Zone Plate (GPU Sample)",
+            "Zone Plate Shader (GPU Sample)",
             null, // no icon
             "GPU Samples",
             new GpuImageEffectOptions()
