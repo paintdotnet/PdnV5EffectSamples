@@ -52,14 +52,14 @@ internal sealed partial class ZonePlateEffect
     private Guid shaderEffectID;
     private IDeviceEffect? shaderEffect;
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken, RenderArgs dstArgs, RenderArgs srcArgs)
+    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
     {
         double scale = newToken.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
         SizeInt32 sourceImageSize = this.SourceImageSize;
         double diameter = (Math.Min(sourceImageSize.Width, sourceImageSize.Height) & ~1) * scale;
         this.shader = new Shader(new int2(sourceImageSize.Width, sourceImageSize.Height), (float)diameter);
        
-        base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
+        base.OnSetRenderInfo(newToken);
     }
 
     protected override InspectTokenAction OnInspectTokenChanges(PropertyBasedEffectConfigToken oldToken, PropertyBasedEffectConfigToken newToken)
@@ -86,7 +86,7 @@ internal sealed partial class ZonePlateEffect
         this.shaderEffect!.SetValue(
             0, 
             PropertyType.Blob, 
-            D2D1InteropServices.GetPixelShaderConstantBufferForD2D1DrawInfo(this.shader));
+            D2D1InteropServices.GetPixelShaderConstantBuffer(this.shader));
 
         base.OnUpdateOutput(deviceContext);
     }

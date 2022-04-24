@@ -43,10 +43,10 @@ internal sealed class DropShadowGpuEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken, RenderArgs dstArgs, RenderArgs srcArgs)
+    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
     {
         this.blurRadius = newToken.GetProperty<Int32Property>(PropertyNames.BlurRadius).Value;
-        base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
+        base.OnSetRenderInfo(newToken);
     }
 
     private int blurRadius;

@@ -91,7 +91,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         return configUI;
     }
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken, RenderArgs dstArgs, RenderArgs srcArgs)
+    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
     {
         this.text = newToken.GetProperty<StringProperty>(PropertyNames.Text).Value;
         this.fontName = (string)newToken.GetProperty<StaticListChoiceProperty>(PropertyNames.FontName).Value;
@@ -99,7 +99,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         this.outlineThickness = newToken.GetProperty<Int32Property>(PropertyNames.OutlineThickness).Value;
         this.rotationAngle = newToken.GetProperty<DoubleProperty>(PropertyNames.RotationAngle).Value;
         this.shadowBlurRadius = newToken.GetProperty<Int32Property>(PropertyNames.ShadowBlurRadius).Value;
-        base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
+        base.OnSetRenderInfo(newToken);
     }
 
     private string? text;

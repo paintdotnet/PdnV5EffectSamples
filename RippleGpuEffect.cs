@@ -73,10 +73,10 @@ internal sealed partial class RippleGpuEffect
         return controlInfo;
     }
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken, RenderArgs dstArgs, RenderArgs srcArgs)
+    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
     {
-        double width = this.SrcArgs.Width;
-        double height = this.SrcArgs.Height;
+        double width = this.SourceImageSize.Width;
+        double height = this.SourceImageSize.Height;
 
         double size = newToken.GetProperty<DoubleProperty>(PropertyNames.Size).Value;
         this.sizePx = size * (Math.Max(width, height) / 2.0);
@@ -93,7 +93,7 @@ internal sealed partial class RippleGpuEffect
 
         this.quality = newToken.GetProperty<Int32Property>(PropertyNames.Quality).Value;
 
-        base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
+        base.OnSetRenderInfo(newToken);
     }
 
     private Guid effectID;
@@ -167,7 +167,7 @@ internal sealed partial class RippleGpuEffect
         rippleEffect.SetValue(
             0, // TODO: there should be a PixelShaderEffectProperties.ConstantBuffer or something
             PropertyType.Blob,
-            D2D1InteropServices.GetPixelShaderConstantBufferForD2D1DrawInfo(new Shader(
+            D2D1InteropServices.GetPixelShaderConstantBuffer(new Shader(
                 (float)this.sizePx * scale,
                 (float)this.frequency,
                 (float)this.phase,
@@ -175,7 +175,7 @@ internal sealed partial class RippleGpuEffect
                 (float)this.spread,
                 new float2(
                     (float)this.centerPoint.X * scale,
-                    (float)this.centerPoint.Y * scale))).Span);
+                    (float)this.centerPoint.Y * scale))));
 
         if (scale == 1)
         {
@@ -196,7 +196,7 @@ internal sealed partial class RippleGpuEffect
     [D2DInputCount(1)]
     [D2DInputComplex(0)]
     [D2DRequiresScenePosition]
-    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader40)]
+    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
     [AutoConstructor]
     private readonly partial struct Shader
         : ID2D1PixelShader

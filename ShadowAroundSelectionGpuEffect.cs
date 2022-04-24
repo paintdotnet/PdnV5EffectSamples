@@ -47,12 +47,12 @@ internal sealed class ShadowAroundSelectionGpuEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken, RenderArgs dstArgs, RenderArgs srcArgs)
+    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
     {
         this.insideSelection = newToken.GetProperty<BooleanProperty>(PropertyNames.InsideSelection).Value;
         this.outsideSelection = newToken.GetProperty<BooleanProperty>(PropertyNames.OutsideSelection).Value;
         this.blurRadius = newToken.GetProperty<Int32Property>(PropertyNames.BlurRadius).Value;
-        base.OnSetRenderInfo(newToken, dstArgs, srcArgs);
+        base.OnSetRenderInfo(newToken);
     }
 
     private bool insideSelection;
