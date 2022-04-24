@@ -14,17 +14,18 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-// https://github.com/saucecontrol/PhotoSauce/blob/v0.13.0/src/MagicScaler/Magic/ZonePlatePixelSource.cs
+// This sample illustrates how to use a simple output-only shader. It renders a "zone plate" test pattern
 // https://en.wikipedia.org/wiki/Zone_plate
+// Code based on: https://github.com/saucecontrol/PhotoSauce/blob/v0.13.0/src/MagicScaler/Magic/ZonePlatePixelSource.cs
 
 namespace PaintDotNet.Effects.Gpu.Samples;
 
 using IDeviceContext = PaintDotNet.Direct2D1.IDeviceContext;
 
-internal sealed partial class ZonePlateEffect
+internal sealed partial class ZonePlateShaderEffect
     : PropertyBasedGpuImageEffect
 {
-    public ZonePlateEffect()
+    public ZonePlateShaderEffect()
         : base(
             "Zone Plate (GPU Sample)",
             null, // no icon
