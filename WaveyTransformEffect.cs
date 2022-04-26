@@ -127,7 +127,7 @@ internal sealed partial class WaveyTransformEffect
             float2 scenePos = D2D.GetScenePosition().XY;
 
             float2 imageSizeF = this.imageSize;
-            float2 uv = (scenePos / imageSizeF) + new float2(0.5f, 0.5f); // [-1, +1], with [0,0] at the center
+            float2 uv = ((scenePos / imageSizeF) - new float2(0.5f, 0.5f)) * 2.0f; // [-1, +1], with [0,0] at the center
 
             Hlsl.SinCos(uv.X * this.scale, out float sinU, out float cosU);
             Hlsl.SinCos(uv.Y * this.scale, out float sinV, out float cosV);
