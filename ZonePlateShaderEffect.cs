@@ -56,7 +56,7 @@ internal sealed partial class ZonePlateShaderEffect
     protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
     {
         double scale = newToken.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
-        SizeInt32 sourceImageSize = this.SourceImageSize;
+        SizeInt32 sourceImageSize = this.SourceSize;
         double diameter = (Math.Min(sourceImageSize.Width, sourceImageSize.Height) & ~1) * scale;
         this.shader = new Shader(new int2(sourceImageSize.Width, sourceImageSize.Height), (float)diameter);
        

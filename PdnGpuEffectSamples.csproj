@@ -29,6 +29,9 @@
     <Reference Include="PaintDotNet.Fundamentals">
       <HintPath>C:\Program Files\paint.net\PaintDotNet.Fundamentals.dll</HintPath>
     </Reference>
+    <Reference Include="PaintDotNet.Framework">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.Framework.dll</HintPath>
+    </Reference>
     <Reference Include="PaintDotNet.Primitives">
       <HintPath>C:\Program Files\paint.net\PaintDotNet.Primitives.dll</HintPath>
     </Reference>

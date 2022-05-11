@@ -64,8 +64,8 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
             PropertyType.Blob,
             D2D1InteropServices.GetPixelShaderConstantBuffer(new Shader(
                 new float3(
-                    this.SourceImageSize.Width,
-                    this.SourceImageSize.Height,
+                    this.SourceSize.Width,
+                    this.SourceSize.Height,
                     0),
                 (float)this.Token.GetProperty<DoubleProperty>(PropertyNames.Time).Value)));
 

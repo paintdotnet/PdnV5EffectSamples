@@ -75,8 +75,8 @@ internal sealed partial class RippleGpuEffect
 
     protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
     {
-        double width = this.SourceImageSize.Width;
-        double height = this.SourceImageSize.Height;
+        double width = this.SourceSize.Width;
+        double height = this.SourceSize.Height;
 
         double size = newToken.GetProperty<DoubleProperty>(PropertyNames.Size).Value;
         this.sizePx = size * (Math.Max(width, height) / 2.0);

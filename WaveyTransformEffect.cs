@@ -6,7 +6,6 @@ using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
 using PaintDotNet.Effects;
 using PaintDotNet.Effects.Gpu;
-using PaintDotNet.Effects.Gpu.Preview;
 using PaintDotNet.Imaging;
 using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
@@ -56,7 +55,7 @@ internal sealed partial class WaveyTransformEffect
     protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
     {
         double scale = newToken.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
-        SizeInt32 sourceImageSize = this.SourceImageSize;
+        SizeInt32 sourceImageSize = this.SourceSize;
         this.shader = new SampleMapShader(
             new uint2((uint)sourceImageSize.Width, (uint)sourceImageSize.Height),
             (float)scale);
@@ -81,13 +80,13 @@ internal sealed partial class WaveyTransformEffect
     {
         this.sampleMapEffect = deviceContext.CreateEffect(this.shaderEffectID);
 
-        this.sampleMapRenderer = SampleMapRenderer.Create(deviceContext, this.SourceImageSize);
+        this.sampleMapRenderer = SampleMapRenderer.Create(deviceContext, this.SourceSize);
         this.sampleMapRenderer.SetInput(this.SourceImage);
         this.sampleMapRenderer.SampleMapCount = 1;
         this.sampleMapRenderer.SetSampleMap(0, this.sampleMapEffect);
-        this.sampleMapRenderer.BorderEdgeMode = SampleMapBorderEdgeMode.Mirror;
+        this.sampleMapRenderer.ExtendMode = SampleMapExtendMode.Mirror;
 
-        return this.sampleMapRenderer;
+        return this.sampleMapRenderer.GetOutput();
     }
 
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
