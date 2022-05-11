@@ -1,6 +1,6 @@
 ﻿// This advanced sample shows how to implement and use a custom HLSL pixel shader.
-// The shader is implemented using ComputeSharp.D2D1, and wrapped in a PixelShaderEffect (also supplied by
-// ComputeSharp.D2D1).
+// The shader is implemented using ComputeSharp.D2D1, and wrapped in a PixelShaderEffect
+// (also supplied by ComputeSharp.D2D1).
 //
 // Ported from Windows SDK sample: https://github.com/microsoft/Windows-universal-samples/tree/main/Samples/D2DCustomEffects/cpp/PixelShader
 
@@ -272,9 +272,7 @@ internal sealed partial class RippleGpuEffect
             in Rectangle output, 
             Span<Rectangle> inputs)
         {
-            // TODO: i'm not sure these calculations are actually correct
-
-            int expansion = 2 * (int)Round(shader.amplitude);
+            int expansion = (int)Round(shader.amplitude);
 
             // Expand the rect out by the amplitude of the ripple animation.
             inputs[0] = RectInt32.FromEdges(

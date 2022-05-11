@@ -12,9 +12,9 @@ using PaintDotNet.PropertySystem;
 using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 // This sample illustrates how to use a shader that outputs a "sample map" to use with SampleMapRenderer.
+// Sample maps are often used to implement "distortion" effects.
 
 namespace PaintDotNet.Effects.Gpu.Samples;
 
@@ -34,12 +34,10 @@ internal sealed partial class WaveyTransformEffect
             })
     {
     }
-
     private enum PropertyNames
     {
         Scale
     }
-
     protected override PropertyCollection OnCreatePropertyCollection()
     {
         List<Property> properties = new List<Property>();
@@ -135,9 +133,12 @@ internal sealed partial class WaveyTransformEffect
                 (sinU + cosV) * this.scale, 
                 (cosU + sinV) * this.scale);
 
-            // The return value from a sample map tells the SampleMapRenderer where to read from the input image
-            // That sample will be drawn at the scene position
-            return new float4(scenePos + dxdy, 0, 0);
+            // The return value from a sample map tells the SampleMapRenderer where to read from the input image.
+            // The format is (X, Y, A, 0), where (X, Y) is the sampling position, which is then multiplied by A.
+            // Usually you should just set A to 1, but you can also use it to modulate the alpha/transparency of
+            // the sampled pixel.
+            // The sampled pixel will then be drawn at the current scene position.
+            return new float4(scenePos + dxdy, 1, 0);
         }
     }
 }

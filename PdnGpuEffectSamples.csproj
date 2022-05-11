@@ -7,7 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <UseWPF>true</UseWPF>    
     <!-- This is necessary so that the build copies the version of nuget packages we're referencing,
-         instead of copying the ones that Paint.NET is using (which may be trimmed and/or different version) -->
+         instead of copying the ones that Paint.NET is using (which may be trimmed and/or a different version) -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
