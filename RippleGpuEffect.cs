@@ -195,6 +195,7 @@ internal sealed partial class RippleGpuEffect
 
     [D2DInputCount(1)]
     [D2DInputComplex(0)]
+    [D2DInputDescription(0, D2D1Filter.MinMagMipLinear)]
     [D2DRequiresScenePosition]
     [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
     [AutoConstructor]
