@@ -1,4 +1,7 @@
-﻿// This advanced sample shows how to implement and use a custom HLSL pixel shader.
+﻿// This advanced sample shows how to implement and use a custom HLSL pixel shader that computes
+// a sample map. SampleMapRenderer is used to render the sample map multiple times at various
+// subpixel offsets to achieve high quality output.
+// 
 // The shader is implemented using ComputeSharp.D2D1, and wrapped in a PixelShaderEffect
 // (also supplied by ComputeSharp.D2D1).
 //
@@ -57,7 +60,7 @@ internal sealed partial class RippleGpuEffect
         properties.Add(new DoubleProperty(PropertyNames.Amplitude, 100, 0.0001, 1000.0));
         properties.Add(new DoubleProperty(PropertyNames.Spread, 1, 0.0001, 100));
         properties.Add(new DoubleVectorProperty(PropertyNames.Center, new Vector2Double(0, 0), new Vector2Double(-1.0, -1.0), new Vector2Double(+1.0, +1.0)));
-        properties.Add(new Int32Property(PropertyNames.Quality, 2, 1, 3));
+        properties.Add(new Int32Property(PropertyNames.Quality, 3, 1, 8));
 
         return new PropertyCollection(properties);
     }
@@ -96,7 +99,7 @@ internal sealed partial class RippleGpuEffect
         base.OnSetRenderInfo(newToken);
     }
 
-    private Guid effectID;
+    private Guid sampleMapEffectID;
     private double sizePx;
     private double frequency;
     private double phase;
@@ -104,102 +107,66 @@ internal sealed partial class RippleGpuEffect
     private double spread;
     private int quality;
     private Point2Double centerPoint;
+    private ISampleMapRenderer? sampleMapRenderer;
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
     {
-        // Register a PixelShaderEffect for this shader. The PixelShaderEffect must be registered once per shader.
-        deviceContext.Factory.RegisterEffectFromBlob(D2D1PixelShaderEffect.GetRegistrationBlob(
-            () => new ShaderTransformMapper(),
-            out this.effectID));
+        // Register a PixelShaderEffect for the shader. The PixelShaderEffect must be registered once per shader.
+        deviceContext.Factory.RegisterEffectFromBlob(
+            D2D1PixelShaderEffect.GetRegistrationBlob<SampleMapShader>(out this.sampleMapEffectID));
 
         base.OnSetDeviceContext(deviceContext);
     }
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        // Produce a higher quality output by rendering at a higher resolution and then downsampling
-        // Note that this is a very bruteforce way of improving rendering quality, and can be extremely
-        // slow at the highest setting on large images.
-        int scale;
-        ScaleInterpolationMode scaleUpInterpolation;
-        ScaleInterpolationMode scaleDownInterpolation;
-        switch (this.quality)
+        // To implement multisampling, the ripple effect is run multiple times at various sampling offsets,
+        // which are then blended together to form the final high-quality output.
+        // The # of samples is equal to the square of the quality value, so a quality value of [1,2,3,4,...,8]
+        // will use [1,4,9,16,...,64] samples.
+
+        this.sampleMapRenderer = SampleMapRenderer.Create(deviceContext, this.SourceSize);
+        this.sampleMapRenderer.SetInput(this.SourceImage);
+        this.sampleMapRenderer.ExtendMode = SampleMapExtendMode.Clamp;
+
+        Vector2Float[] sampleOffsets = EffectHelpers.GetRgssOffsets(this.quality);
+        this.sampleMapRenderer.SampleMapCount = sampleOffsets.Length;
+
+        for (int i = 0; i < sampleOffsets.Length; ++i)
         {
-            case 1:
-                scale = 1;
-                scaleUpInterpolation = ScaleInterpolationMode.NearestNeighbor;
-                scaleDownInterpolation = ScaleInterpolationMode.NearestNeighbor;
-                break;
+            ScenePositionEffect scenePosSampleMap = new ScenePositionEffect(deviceContext);
 
-            case 2:
-                scale = 2;
-                scaleUpInterpolation = ScaleInterpolationMode.Linear;
-                scaleDownInterpolation = ScaleInterpolationMode.Linear;
-                break;
+            AddConstEffect scenePosRgssSampleMap = new AddConstEffect(deviceContext);
+            scenePosRgssSampleMap.Properties.Input.Set(scenePosSampleMap);
+            scenePosRgssSampleMap.Properties.Value.SetValue(new Vector4Float(sampleOffsets[i], 0, 0));
 
-            case 3:
-                scale = 4;
-                scaleUpInterpolation = ScaleInterpolationMode.HighQualityCubic;
-                scaleDownInterpolation = ScaleInterpolationMode.HighQualityCubic;
-                break;
+            IDeviceEffect rippleSampleMap = deviceContext.CreateEffect(this.sampleMapEffectID);
+            rippleSampleMap.SetInput(0, scenePosRgssSampleMap);
+            rippleSampleMap.SetValue(
+                0, // TODO: there should be a PixelShaderEffectProperties.ConstantBuffer or something
+                PropertyType.Blob,
+                D2D1PixelShader.GetConstantBuffer(new SampleMapShader(
+                    (float)this.sizePx,
+                    (float)this.frequency,
+                    (float)this.phase,
+                    (float)this.amplitude,
+                    (float)this.spread,
+                    new float2(
+                        (float)this.centerPoint.X,
+                        (float)this.centerPoint.Y))));
 
-            default:
-                throw new ArgumentException();
+            this.sampleMapRenderer.SetSampleMap(i, rippleSampleMap);
         }
 
-        IDeviceImage sourceImage;
-        if (scale == 1)
-        {
-            sourceImage = this.SourceImage;
-        }
-        else
-        {
-            ScaleEffect scaleUpEffect = new ScaleEffect(deviceContext);
-            scaleUpEffect.Properties.Input.Set(this.SourceImage);
-            scaleUpEffect.Properties.Scale.SetValue(new Vector2Float(scale, scale));
-            scaleUpEffect.Properties.InterpolationMode.SetValue(scaleUpInterpolation);
-            scaleUpEffect.Properties.BorderMode.SetValue(BorderMode.Soft);
-            sourceImage = scaleUpEffect;
-        }
-
-        IDeviceEffect rippleEffect = deviceContext.CreateEffect(this.effectID);
-        rippleEffect.SetInput(0, sourceImage);
-        rippleEffect.SetValue(
-            0, // TODO: there should be a PixelShaderEffectProperties.ConstantBuffer or something
-            PropertyType.Blob,
-            D2D1PixelShader.GetConstantBuffer(new Shader(
-                (float)this.sizePx * scale,
-                (float)this.frequency,
-                (float)this.phase,
-                (float)(this.amplitude * scale),
-                (float)this.spread,
-                new float2(
-                    (float)this.centerPoint.X * scale,
-                    (float)this.centerPoint.Y * scale))));
-
-        if (scale == 1)
-        {
-            return rippleEffect;
-        }
-        else
-        {
-            ScaleEffect scaleDownEffect = new ScaleEffect(deviceContext);
-            scaleDownEffect.Properties.Input.Set(rippleEffect);
-            scaleDownEffect.Properties.Scale.SetValue(new Vector2Float(1.0f / scale, 1.0f / scale));
-            scaleDownEffect.Properties.InterpolationMode.SetValue(scaleDownInterpolation);
-            scaleDownEffect.Properties.BorderMode.SetValue(BorderMode.Soft);
-
-            return scaleDownEffect;
-        }
+        return this.sampleMapRenderer.GetOutput();
     }
 
     [D2DInputCount(1)]
-    [D2DInputComplex(0)]
-    [D2DInputDescription(0, D2D1Filter.MinMagMipLinear)]
-    [D2DRequiresScenePosition]
+    [D2DInputSimple(0)]
+    [D2DInputDescription(0, D2D1Filter.MinLinearMagMipPoint)]
     [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
     [AutoConstructor]
-    private readonly partial struct Shader
+    private readonly partial struct SampleMapShader
         : ID2D1PixelShader
     {
         public readonly float size;
@@ -211,7 +178,10 @@ internal sealed partial class RippleGpuEffect
 
         public float4 Execute()
         {
-            float2 toPixel = D2D.GetScenePosition().XY - this.center;
+            // Sample map shaders read the scene position from the input, instead of via D2D.GetScenePos()
+            float2 scenePos = D2D.GetInput(0).XY; 
+
+            float2 toPixel = scenePos - this.center;
 
             // Scale distance such that the ripple's displacement decays to 0 at the requested size (in pixels)
             float distance = Hlsl.Length(toPixel * (1.0f / this.size));
@@ -227,76 +197,17 @@ internal sealed partial class RippleGpuEffect
 
             // Calculate new mapping coordinates based on the frequency, center, and amplitude.
             float2 inputOffset = (wave.X * falloff * this.amplitude) * direction;
-            float lighting = Hlsl.Lerp(1.0f, 1.0f + wave.X * falloff * 0.2f, Hlsl.Saturate(this.amplitude / 20.0f));
 
-            // Resample the image based on the new coordinates.
-            float4 color = D2D.SampleInputAtOffset(0, inputOffset);
-            color.RGB *= lighting;
+            // Not currently using this value -- planning to make this possible in a future build
+            //float lighting = Hlsl.Lerp(1.0f, 1.0f + wave.X * falloff * 0.2f, Hlsl.Saturate(this.amplitude / 20.0f));
+            //sample.RGB *= lighting;
 
-            return color;
-        }
-    }
-
-    private sealed class ShaderTransformMapper
-        : ID2D1TransformMapper<Shader>
-    {
-        private Shader shader;
-        private RectInt32 inputRect;
-
-        // This method is always called first, and is only called once for each rendering (that is,
-        // when the hosting effect is drawn with DrawImage()). This method may modify state, but the
-        // others may not be (they must be "functional" and not modify state).
-        // See also: https://docs.microsoft.com/en-us/windows/win32/api/d2d1effectauthor/nf-d2d1effectauthor-id2d1transform-mapinputrectstooutputrect
-        public void MapInputsToOutput(
-            in Shader shader, 
-            ReadOnlySpan<Rectangle> inputs, 
-            ReadOnlySpan<Rectangle> opaqueInputs, 
-            out Rectangle output, 
-            out Rectangle opaqueOutput)
-        {
-            // Store the shader so we can use it later
-            this.shader = shader;
-
-            output = inputs[0];
-
-            // Store the inputRect so we can use it later in MapInvalidRect
-            this.inputRect = inputs[0];
-
-            // Indicate that entire output might contain transparency.
-            opaqueOutput = RectInt32.Zero;
-        }
-
-        public void MapInvalidOutput(
-            int inputIndex, 
-            Rectangle invalidInput, 
-            out Rectangle invalidOutput)
-        {
-            // Indicate that the entire output may be invalid.
-            invalidOutput = this.inputRect;
-        }
-
-        public void MapOutputToInputs(
-            in Rectangle output, 
-            Span<Rectangle> inputs)
-        {
-            int expansion = (int)Round(shader.amplitude);
-
-            // Expand the rect out by the amplitude of the ripple animation.
-            inputs[0] = RectInt32.FromEdges(
-                SafeAdd(output.Left, -expansion),
-                SafeAdd(output.Top, -expansion),
-                SafeAdd(output.Right, expansion),
-                SafeAdd(output.Bottom, expansion));
-        }
-
-        private static float Round(float v)
-        {
-            return MathF.Floor(v + 0.5f);
-        }
-
-        private static int SafeAdd(int baseValue, int valueToAdd)
-        {
-            return (int)Math.Clamp((long)baseValue + valueToAdd, int.MinValue, int.MaxValue);
+            // The return value from a sample map shader is in the format (X,Y,A,*)
+            // X and Y are the pixel to sample from, which is then multiplied by A (alpha)
+            // The fourth component of the return value is currently discarded, but in a later build it will be possible
+            // to pass that value into a post-processor (e.g. to apply the lighting value that's commented out above)
+            float2 samplePos = scenePos + inputOffset;
+            return new float4(samplePos, 1, 0);
         }
     }
 }
