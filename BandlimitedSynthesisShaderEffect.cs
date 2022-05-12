@@ -62,7 +62,7 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
         this.shaderEffect!.SetValue(
             0,
             PropertyType.Blob,
-            D2D1InteropServices.GetPixelShaderConstantBuffer(new Shader(
+            D2D1PixelShader.GetConstantBuffer(new Shader(
                 new float3(
                     this.SourceSize.Width,
                     this.SourceSize.Height,

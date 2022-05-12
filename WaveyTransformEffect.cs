@@ -95,7 +95,7 @@ internal sealed partial class WaveyTransformEffect
         this.sampleMapEffect!.SetValue(
             0, 
             PropertyType.Blob, 
-            D2D1InteropServices.GetPixelShaderConstantBuffer(this.shader));
+            D2D1PixelShader.GetConstantBuffer(this.shader));
 
         base.OnUpdateOutput(deviceContext);
     }

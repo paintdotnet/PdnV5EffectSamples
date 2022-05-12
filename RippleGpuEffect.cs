@@ -167,7 +167,7 @@ internal sealed partial class RippleGpuEffect
         rippleEffect.SetValue(
             0, // TODO: there should be a PixelShaderEffectProperties.ConstantBuffer or something
             PropertyType.Blob,
-            D2D1InteropServices.GetPixelShaderConstantBuffer(new Shader(
+            D2D1PixelShader.GetConstantBuffer(new Shader(
                 (float)this.sizePx * scale,
                 (float)this.frequency,
                 (float)this.phase,
@@ -239,8 +239,13 @@ internal sealed partial class RippleGpuEffect
     private sealed class ShaderTransformMapper
         : ID2D1TransformMapper<Shader>
     {
+        private Shader shader;
         private RectInt32 inputRect;
 
+        // This method is always called first, and is only called once for each rendering (that is,
+        // when the hosting effect is drawn with DrawImage()). This method may modify state, but the
+        // others may not be (they must be "functional" and not modify state).
+        // See also: https://docs.microsoft.com/en-us/windows/win32/api/d2d1effectauthor/nf-d2d1effectauthor-id2d1transform-mapinputrectstooutputrect
         public void MapInputsToOutput(
             in Shader shader, 
             ReadOnlySpan<Rectangle> inputs, 
@@ -248,6 +253,9 @@ internal sealed partial class RippleGpuEffect
             out Rectangle output, 
             out Rectangle opaqueOutput)
         {
+            // Store the shader so we can use it later
+            this.shader = shader;
+
             output = inputs[0];
 
             // Store the inputRect so we can use it later in MapInvalidRect
@@ -258,7 +266,6 @@ internal sealed partial class RippleGpuEffect
         }
 
         public void MapInvalidOutput(
-            in Shader shader, 
             int inputIndex, 
             Rectangle invalidInput, 
             out Rectangle invalidOutput)
@@ -268,7 +275,6 @@ internal sealed partial class RippleGpuEffect
         }
 
         public void MapOutputToInputs(
-            in Shader shader, 
             in Rectangle output, 
             Span<Rectangle> inputs)
         {
