@@ -111,7 +111,7 @@ internal sealed partial class RippleGpuEffect
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
     {
-        // Register a PixelShaderEffect for the shader. The PixelShaderEffect must be registered once per shader.
+        // Register a D2D1PixelShaderEffect for the shader. The PixelShaderEffect must be registered once per shader.
         deviceContext.Factory.RegisterEffectFromBlob(
             D2D1PixelShaderEffect.GetRegistrationBlob<SampleMapShader>(out this.sampleMapEffectID));
 
@@ -121,7 +121,7 @@ internal sealed partial class RippleGpuEffect
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
         // To implement multisampling, the ripple effect is run multiple times at various sampling offsets,
-        // which are then blended together to form the final high-quality output.
+        // which are then blended together by the SampleMapRenderer to form the final high-quality output.
         // The # of samples is equal to the square of the quality value, so a quality value of [1,2,3,4,...,8]
         // will use [1,4,9,16,...,64] samples.
 
@@ -143,7 +143,7 @@ internal sealed partial class RippleGpuEffect
             IDeviceEffect rippleSampleMap = deviceContext.CreateEffect(this.sampleMapEffectID);
             rippleSampleMap.SetInput(0, scenePosRgssSampleMap);
             rippleSampleMap.SetValue(
-                0, // TODO: there should be a PixelShaderEffectProperties.ConstantBuffer or something
+                0, // TODO: there should be a D2D1PixelShaderEffectProperty.ConstantBuffer, see https://github.com/Sergio0694/ComputeSharp/issues/237
                 PropertyType.Blob,
                 D2D1PixelShader.GetConstantBuffer(new SampleMapShader(
                     (float)this.sizePx,
