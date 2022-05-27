@@ -63,7 +63,9 @@ internal sealed partial class ZonePlateShaderEffect
         base.OnSetRenderInfo(newToken);
     }
 
-    protected override InspectTokenAction OnInspectTokenChanges(PropertyBasedEffectConfigToken oldToken, PropertyBasedEffectConfigToken newToken)
+    protected override InspectTokenAction OnInspectTokenChanges(
+        PropertyBasedEffectConfigToken oldToken, 
+        PropertyBasedEffectConfigToken newToken)
     {
         return InspectTokenAction.UpdateOutput;
     }
