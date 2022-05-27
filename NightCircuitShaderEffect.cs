@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 // This is an example of a complicated shader ported from GLSL over at ShaderToy
+// This sample also shows how to choose at runtime between running a shader in either IEEE strict or relaxed mode.
 // Originally written by "gaz": https://www.shadertoy.com/view/tdyBR1
 
 namespace PaintDotNet.Effects.Gpu.Samples;
@@ -36,6 +37,7 @@ internal sealed partial class NightCircuitShaderEffect
     {
         Time,
         Quality,
+        IeeeStrict,
         Link
     }
 
@@ -45,6 +47,7 @@ internal sealed partial class NightCircuitShaderEffect
 
         properties.Add(new Int32Property(PropertyNames.Time, 0, 0, 3000));
         properties.Add(new Int32Property(PropertyNames.Quality, 2, 1, 4));
+        properties.Add(new BooleanProperty(PropertyNames.IeeeStrict, false));
         properties.Add(new UriProperty(PropertyNames.Link, new Uri("https://www.shadertoy.com/view/tdyBR1")));
 
         return new PropertyCollection(properties);
@@ -62,7 +65,8 @@ internal sealed partial class NightCircuitShaderEffect
 
     protected override InspectTokenAction OnInspectTokenChanges(PropertyBasedEffectConfigToken oldToken, PropertyBasedEffectConfigToken newToken)
     {
-        if (oldToken.GetProperty<Int32Property>(PropertyNames.Quality).Value != newToken.GetProperty<Int32Property>(PropertyNames.Quality).Value)
+        if (oldToken.GetProperty<Int32Property>(PropertyNames.Quality).Value != newToken.GetProperty<Int32Property>(PropertyNames.Quality).Value ||
+            oldToken.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict).Value != newToken.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict).Value)
         {
             return InspectTokenAction.RecreateOutput;
         }
@@ -72,16 +76,16 @@ internal sealed partial class NightCircuitShaderEffect
         }
     }
 
-    private Guid effectID;
+    private Guid ieeeRelaxedEffectID;
+    private Guid ieeeStrictEffectID;
     private Vector2Float[]? subPixelOffsets;
     private AddConstEffect[]? subPxScenePosEffects;
     private IDeviceEffect[]? pixelShaderEffects;
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
     {
-        deviceContext.Factory.RegisterEffectFromBlob(
-            D2D1PixelShaderEffect.GetRegistrationBlob<Shader>(out this.effectID));
-
+        deviceContext.Factory.RegisterEffectFromBlob(D2D1PixelShaderEffect.GetRegistrationBlob<IeeeRelaxedShader>(out this.ieeeRelaxedEffectID));
+        deviceContext.Factory.RegisterEffectFromBlob(D2D1PixelShaderEffect.GetRegistrationBlob<IeeeStrictShader>(out this.ieeeStrictEffectID));
         base.OnSetDeviceContext(deviceContext);
     }
 
@@ -107,6 +111,8 @@ internal sealed partial class NightCircuitShaderEffect
     {
         // Multisample Antialiasing (MSAA) is implemented by rendering the shader multiple times at various subpixel offsets
         // Each effect output is summed together using the CompositeEffect, then divided at the end with the MultiplyConstEffect
+
+        bool ieeeStrict = this.Token.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict).Value;
 
         int quality = this.Token.GetProperty<Int32Property>(PropertyNames.Quality).Value;
         this.subPixelOffsets = EffectHelpers.GetRgssOffsets(quality);
@@ -140,7 +146,7 @@ internal sealed partial class NightCircuitShaderEffect
             this.subPxScenePosEffects[i]!.Properties.Input.Set(scenePosEffect);
             this.subPxScenePosEffects[i]!.Properties.Value.SetValue(new Vector4Float(this.subPixelOffsets[i], 0, 0));
 
-            this.pixelShaderEffects[i] = deviceContext.CreateEffect(this.effectID);
+            this.pixelShaderEffects[i] = deviceContext.CreateEffect(ieeeStrict ? this.ieeeStrictEffectID : this.ieeeRelaxedEffectID);
             this.pixelShaderEffects[i]!.SetInput(0, this.subPxScenePosEffects[i]);
 
             compositeEffect.SetInput(i, this.pixelShaderEffects[i]);
@@ -156,15 +162,19 @@ internal sealed partial class NightCircuitShaderEffect
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
     {
         int time = this.Token.GetProperty<Int32Property>(PropertyNames.Time).Value;
+        bool ieeeStrict = this.Token.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict).Value;
 
         for (int i = 0; i < this.subPixelOffsets!.Length; ++i)
         {
+            float iTime = time / 30.0f;
+            float2 iResolution = new float2(this.SourceSize.Width, this.SourceSize.Height);
+
             this.pixelShaderEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
                 PropertyType.Blob,
-                D2D1PixelShader.GetConstantBuffer(new Shader(
-                    time / 30.0f,
-                    new float2(this.SourceSize.Width, this.SourceSize.Height))));
+                ieeeStrict
+                    ? D2D1PixelShader.GetConstantBuffer(new IeeeStrictShader(iTime, iResolution))
+                    : D2D1PixelShader.GetConstantBuffer(new IeeeRelaxedShader(iTime, iResolution)));
         }
 
         base.OnUpdateOutput(deviceContext);
@@ -175,10 +185,16 @@ internal sealed partial class NightCircuitShaderEffect
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)]
     [D2DRequiresScenePosition]
     [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking)]
     [AutoConstructor]
-    private partial struct Shader
+    private partial struct IeeeRelaxedShader
         : ID2D1PixelShader
     {
+        // TODO: bug in ComputeSharp means I have to have a copy of this const over here, not just in ShaderImpl. https://github.com/Sergio0694/ComputeSharp/issues/298
+        //#define TAU atan(1.)*8.
+        private static readonly float TAU = Hlsl.Atan(1.0f) * 8.0f;
+
+        // Standard input constants for ShaderToy shaders
         private float iTime;
         private readonly float2 iResolution;
 
@@ -186,40 +202,70 @@ internal sealed partial class NightCircuitShaderEffect
         public float4 Execute()
         {
             float2 scenePos = D2D.GetInput(0).XY;
-            mainImage(out float4 fragColor, scenePos);
+            ShaderImpl.mainImage(out float4 fragColor, scenePos, this.iTime, this.iResolution);
             return fragColor;
         }
+    }
 
+    [D2DInputCount(1)]
+    [D2DInputSimple(0)]
+    [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)]
+    [D2DRequiresScenePosition]
+    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking | D2D1CompileOptions.IeeeStrictness)]
+    [AutoConstructor]
+    private partial struct IeeeStrictShader
+        : ID2D1PixelShader
+    {
+        // TODO: bug in ComputeSharp means I have to have a copy of this const over here, not just in ShaderImpl. https://github.com/Sergio0694/ComputeSharp/issues/298
         //#define TAU atan(1.)*8.
         private static readonly float TAU = Hlsl.Atan(1.0f) * 8.0f;
 
-        void lookAt(ref float3 rd, float3 ro, float3 ta, float3 up)
+        // Standard input constants for ShaderToy shaders
+        private float iTime;
+        private readonly float2 iResolution;
+
+        // This Execute() method adapts ShaderToy's mainImage() to work with ComputeSharp.D2D1's expected method signature
+        public float4 Execute()
+        {
+            float2 scenePos = D2D.GetInput(0).XY;
+            ShaderImpl.mainImage(out float4 fragColor, scenePos, this.iTime, this.iResolution);
+            return fragColor;
+        }
+    }
+
+    private static class ShaderImpl
+    {
+        //#define TAU atan(1.)*8.
+        private static readonly float TAU = Hlsl.Atan(1.0f) * 8.0f;
+
+        static void lookAt(ref float3 rd, float3 ro, float3 ta, float3 up)
         {
             float3 w = Hlsl.Normalize(ta - ro);
             float3 u = Hlsl.Normalize(Hlsl.Cross(w, up));
             rd = rd.X * u + rd.Y * Hlsl.Cross(u, w) + rd.Z * w;
         }
 
-        void pointAt(ref float3 p, float3 dir, float3 up)
+        private static void pointAt(ref float3 p, float3 dir, float3 up)
         {
             float3 u = Hlsl.Normalize(Hlsl.Cross(dir, up));
             p = new float3(Hlsl.Dot(p, u), Hlsl.Dot(p, Hlsl.Cross(u, dir)), Hlsl.Dot(p, dir));
         }
 
-        void rot(ref float3 p, float3 a, float t)
+        private static void rot(ref float3 p, float3 a, float t)
         {
             a = Hlsl.Normalize(a);
             float3 u = Hlsl.Cross(a, p), v = Hlsl.Cross(a, u);
             p = u * Hlsl.Sin(t) + v * Hlsl.Cos(t) + a * Hlsl.Dot(a, p);
         }
 
-        void rot(ref float2 p, float t)
+        private static void rot(ref float2 p, float t)
         {
             p = p * Hlsl.Cos(t) + new float2(-p.Y, p.X) * Hlsl.Sin(t);
         }
 
         // https://www.shadertoy.com/view/WdfcWr
-        void pSFold(ref float2 p, float n)
+        private static void pSFold(ref float2 p, float n)
         {
             float h = Hlsl.Floor(Hlsl.Log2(n)), a = TAU * Hlsl.Exp2(h) / n;
             for (float i = 0; i < h + 2; i++)
@@ -250,13 +296,13 @@ internal sealed partial class NightCircuitShaderEffect
             return Hlsl.Frac(Hlsl.Sin(p * 12345.5f));
         }
 
-        float3 randVec(float s)
+        private static float3 randVec(float s)
         {
             float2 n = hash(new float2(s, s + 215.3f));
             return new float3(Hlsl.Cos(n.Y) * Hlsl.Cos(n.X), Hlsl.Sin(n.Y), Hlsl.Cos(n.Y) * Hlsl.Sin(n.X));
         }
 
-        float3 randCurve(float t, float n)
+        private static float3 randCurve(float t, float n)
         {
             float3 p = default;
             for (int i = 0; i < 3; i++)
@@ -266,7 +312,7 @@ internal sealed partial class NightCircuitShaderEffect
             return p;
         }
 
-        float3 orbit(float t, float n)
+        private static float3 orbit(float t, float n, float iTime)
         {
             float3 p = randCurve(-t * 1.5f + iTime, seed) * 5;
             float3 off = randVec(n) * (t + 0.05f) * 0.6f;
@@ -275,14 +321,14 @@ internal sealed partial class NightCircuitShaderEffect
         }
 
         // rewrote 20/12/01
-        void sFold45(ref float2 p)
+        private static void sFold45(ref float2 p)
         {
             float2 v = Hlsl.Normalize(new float2(1, -1));
             float g = Hlsl.Dot(p, v);
             p -= (g - Hlsl.Sqrt(g * g + 5e-5f)) * v;
         }
 
-        float stella(float3 p, float s)
+        private static float stella(float3 p, float s)
         {
             p = Hlsl.Sqrt(p * p + 5e-5f); // https://iquilezles.org/articles/functions
             sFold45(ref p.XZ);
@@ -300,7 +346,7 @@ internal sealed partial class NightCircuitShaderEffect
         }
         */
 
-        float stellas(float3 p)
+        private static float stellas(float3 p, float iTime)
         {
             p.Y -= -iTime;
             float c = 2.0f;
@@ -312,7 +358,7 @@ internal sealed partial class NightCircuitShaderEffect
             return Hlsl.Min(0.7f, stella(p, 0.08f));
         }
 
-        float structure(float3 p, ref float g1, ref float g2)
+        private static float structure(float3 p, ref float g1, ref float g2, float iTime)
         {
             float d = 1e3f, d0;
             for (int i = 0; i < 12; i++)
@@ -351,7 +397,7 @@ internal sealed partial class NightCircuitShaderEffect
             return d;
         }
 
-        float rabbit(float3 p, ref float g3)
+        private static float rabbit(float3 p, ref float g3, float iTime)
         {
             p -= randCurve(iTime, seed) * 5.0f;
             rot(ref p, new float3(1, 1, 1), iTime);
@@ -360,34 +406,34 @@ internal sealed partial class NightCircuitShaderEffect
             return d;
         }
 
-        float map(float3 p, ref float g1, ref float g2, ref float g3)
+        private static float map(float3 p, ref float g1, ref float g2, ref float g3, float iTime)
         {
-            return Hlsl.Min(Hlsl.Min(stellas(p), structure(p, ref g1, ref g2)), rabbit(p, ref g3));
+            return Hlsl.Min(Hlsl.Min(stellas(p, iTime), structure(p, ref g1, ref g2, iTime)), rabbit(p, ref g3, iTime));
         }
 
-        float3 calcNormal(float3 p, ref float g1, ref float g2, ref float g3)
+        private static float3 calcNormal(float3 p, ref float g1, ref float g2, ref float g3, float iTime)
         {
             float3 n = default;
             for (int i = 0; i < 4; i++)
             {
                 float3 e = 0.001f * (new float3(9 >> i & 1, i >> 1 & 1, i & 1) * 2.0f - 1.0f);
-                n += e * map(p + e, ref g1, ref g2, ref g3);
+                n += e * map(p + e, ref g1, ref g2, ref g3, iTime);
             }
             return Hlsl.Normalize(n);
         }
 
-        float3 doColor(float3 p)
+        private static float3 doColor(float3 p, float iTime)
         {
-            if (stellas(p) < 0.001f) return new float3(0.7f, 0.7f, 1);
+            if (stellas(p, iTime) < 0.001f) return new float3(0.7f, 0.7f, 1);
             return new float3(1, 1, 1);
         }
 
-        float3 hue(float h)
+        private static float3 hue(float h)
         {
             return Hlsl.Cos((new float3(0, 2, -2) / 3.0f + h) * TAU) * 0.5f + 0.5f;
         }
 
-        float3 cLine(float3 ro, float3 rd, float3 a, float3 b)
+        private static float3 cLine(float3 ro, float3 rd, float3 a, float3 b)
         {
             float3 ab = Hlsl.Normalize(b - a), ao = a - ro;
             float d0 = Hlsl.Dot(rd, ab), d1 = Hlsl.Dot(rd, ao), d2 = Hlsl.Dot(ab, ao);
@@ -397,7 +443,7 @@ internal sealed partial class NightCircuitShaderEffect
             return new float3(Hlsl.Length(Hlsl.Cross(p, rd)), Hlsl.Dot(p, rd), t);
         }
 
-        static float int7_10_12_15(int index)
+        private static float int7_10_12_15(int index)
         {
             return index == 0 ? 7
                 : index == 1 ? 10
@@ -405,7 +451,7 @@ internal sealed partial class NightCircuitShaderEffect
                 : 15;
         }
 
-        void mainImage(out float4 fragColor, float2 fragCoord)
+        public static void mainImage(out float4 fragColor, float2 fragCoord, float iTime, float2 iResolution)
         {
             float g1 = 0;
             float g2 = 0;
@@ -425,15 +471,15 @@ internal sealed partial class NightCircuitShaderEffect
             float z = 0.0f, i, d = 0, ITR = 50.0f;
             for (i = 0.0f; i < ITR; i++)
             {
-                z += d = map(ro + rd * z, ref g1, ref g2, ref g3);
+                z += d = map(ro + rd * z, ref g1, ref g2, ref g3, iTime);
                 if (d < 0.001f || z > 30.0f) break;
             }
             if (d < .001f)
             {
                 float3 p2 = ro + rd * z;
-                float3 nor = calcNormal(p2, ref g1, ref g2, ref g3);
+                float3 nor = calcNormal(p2, ref g1, ref g2, ref g3, iTime);
                 float3 li = Hlsl.Normalize(new float3(1, 1, -1));
-                col = doColor(p2);
+                col = doColor(p2, iTime);
                 col *= Hlsl.Pow(Hlsl.Abs(1.9f - i / ITR), 2.0f);
                 col *= Hlsl.Clamp(Hlsl.Dot(nor, li), 0.3f, 1.0f);
                 col *= Hlsl.Max(0.5f + 0.5f * nor.Y, 0.2f);
@@ -455,7 +501,7 @@ internal sealed partial class NightCircuitShaderEffect
                 for (float j = 0.0f; j < 1.0f; j += 1.0f / ITR)
                 {
                     float t = j + off * 0.5f;
-                    float3 c = cLine(ro, rd, orbit(t, off), orbit(t + 1.0f / ITR, off));
+                    float3 c = cLine(ro, rd, orbit(t, off, iTime), orbit(t + 1.0f / ITR, off, iTime));
                     if (de.X * de.X * de.Y > c.X * c.X * c.Y)
                     {
                         de = c;
