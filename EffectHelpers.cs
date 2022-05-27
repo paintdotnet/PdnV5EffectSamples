@@ -1,9 +1,5 @@
 ﻿using PaintDotNet.Rendering;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PaintDotNet.Effects.Gpu.Samples;
 
@@ -29,7 +25,7 @@ internal class EffectHelpers
         float x = y * quality;
         x -= (int)x;
 
-        return new Vector2Float((float)(x - 0.5d), (float)(y - 0.5d));
+        return new Vector2Float(x - 0.5f, y - 0.5f);
     }
 
     public static Vector2Float[] GetRgssOffsets(int quality)
