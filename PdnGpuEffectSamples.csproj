@@ -11,7 +11,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.0-alpha.23" />
+    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.0-alpha.24" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PaintDotNet.ComponentModel">
