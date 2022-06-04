@@ -55,7 +55,7 @@ internal sealed partial class HueRotateEffect
     {
         double angle = this.Token.GetProperty<DoubleProperty>(PropertyNames.Angle).Value;
 
-        // 1. Convert from premultiplied RGBA to HSVA
+        // 1. Convert SourceImage from premultiplied RGBA to HSVA
         // Direct2D's RGB-to-Hue effect: https://docs.microsoft.com/en-us/windows/win32/direct2d/rgb-to-hue-effect
         RgbToHueEffect rgbToHueEffect = new RgbToHueEffect(deviceContext);
         rgbToHueEffect.Properties.Input.Set(this.SourceImage);
