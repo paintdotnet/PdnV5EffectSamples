@@ -18,12 +18,12 @@ namespace PaintDotNet.Effects.Gpu.Samples;
 // slider in the UI. This also reduces pressure on the .NET garbage collector, since it won't
 // need to finalize those objects.
 
-internal sealed partial class HueRotateAdvancedEffect
+internal sealed partial class HueRotateEffectAdvanced
     : PropertyBasedGpuImageEffect
 {
-    public HueRotateAdvancedEffect()
+    public HueRotateEffectAdvanced()
         : base(
-            "Hue Rotate (advanced implementation) (GPU Sample)",
+            "Hue Rotate (GPU Sample, Advanced Implementation)",
             null, // no menu icon
             "GPU Samples",
             new GpuImageEffectOptions()
