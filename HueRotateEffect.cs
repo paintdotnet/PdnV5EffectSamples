@@ -89,16 +89,16 @@ internal sealed partial class HueRotateEffect
 
         public float4 Execute()
         {
-            float4 hsv = D2D.GetInput(0);
+            float4 hsva = D2D.GetInput(0);
 
             // From the documentation for Direct2D's RGB-to-Hue effect: https://docs.microsoft.com/en-us/windows/win32/direct2d/rgb-to-hue-effect
             // "This effect normalizes the output data (hue, saturation value for HSV or hue, saturation, lightness for HSL) to the range [0, 1]."
             // The hue, stored in the red channel, is [0, 1] instead of [0, 360], so we must do some math.
-            float hue = hsv.R * 360.0f;
+            float hue = hsva.R * 360.0f;
             float newHue = (hue + this.angle) % 360.0f;
             float newR = newHue / 360.0f;
 
-            return new float4(newR, hsv.GBA);
+            return new float4(newR, hsva.GBA);
         }
     }
 }
