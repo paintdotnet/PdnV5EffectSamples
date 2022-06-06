@@ -11,7 +11,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.0-alpha.24" />
+    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.0-alpha.25" />
   </ItemGroup>
   <ItemGroup>
     <!-- Be sure to set Private=False (aka CopyLocal=false) on the Paint.NET assemblies 
