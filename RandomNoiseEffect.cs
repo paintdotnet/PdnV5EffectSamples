@@ -130,9 +130,8 @@ internal sealed partial class RandomNoiseEffect
         this.blendEffect.Properties.Source.Set(this.coloredShaderEffect);
 
         this.outputEffect = new InputSelectorEffect(deviceContext);
-        this.outputEffect.InputCount = 2;
-        this.outputEffect.SetInput(0, this.coloredShaderEffect);
-        this.outputEffect.SetInput(1, this.blendEffect);
+        this.outputEffect.Properties.Inputs.Add(this.coloredShaderEffect);
+        this.outputEffect.Properties.Inputs.Add(this.blendEffect);
 
         return this.outputEffect;
     }
