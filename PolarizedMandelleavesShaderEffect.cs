@@ -6,6 +6,7 @@ using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
 using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
+using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
 using PaintDotNet.Rendering;
 using System;
@@ -48,7 +49,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     {
         List<Property> properties = new List<Property>();
 
-        properties.Add(new DoubleProperty(PropertyNames.FractalZoom, 1.0, 0.1, 100.0));
+        properties.Add(new DoubleProperty(PropertyNames.FractalZoom, 1.0, 0.01, 100.0));
         properties.Add(new DoubleProperty(PropertyNames.PolarInversionAmount, 0, -8, 8));
         properties.Add(new DoubleVectorProperty(PropertyNames.PolarInversionOffset, new Vector2Double(0, 0), new Vector2Double(-2, -2), new Vector2Double(2, 2)));
         properties.Add(new BooleanProperty(PropertyNames.InfiniteCoordinateSpace, false));
@@ -58,12 +59,21 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
         return new PropertyCollection(properties);
     }
 
+    protected override ControlInfo OnCreateConfigUI(PropertyCollection props)
+    {
+        ControlInfo configUI = CreateDefaultConfigUI(props);
+
+        configUI.SetPropertyControlValue(PropertyNames.FractalZoom, ControlInfoPropertyNames.UseExponentialScale, true);
+
+        return configUI;
+    }
+
     private Guid polarInversionEffectID;
     private Guid sampleMapMirrorEffectID;
     private Guid mandelleavesEffectID;
 
     private Vector2Float[]? subPixelOffsets;
-    private AddConstEffect[]? subPxScenePosEffects;
+    private ArithmeticConstEffect[]? subPxScenePosEffects;
     private IDeviceEffect[]? polarInversionEffects;
     private IDeviceEffect[]? sampleMapMirrorEffects;
     private IDeviceEffect[]? mandelleavesShaderEffects;
@@ -108,7 +118,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
         compositeEffect.InputCount = this.subPixelOffsets.Length;
         compositeEffect.Properties.Mode.SetValue(CompositeMode.Plus);
 
-        this.subPxScenePosEffects = new AddConstEffect[this.subPixelOffsets!.Length];
+        this.subPxScenePosEffects = new ArithmeticConstEffect[this.subPixelOffsets!.Length];
         this.polarInversionEffects = new IDeviceEffect[this.subPixelOffsets!.Length];
         this.sampleMapMirrorEffects = new IDeviceEffect[this.subPixelOffsets!.Length];
         this.mandelleavesShaderEffects = new IDeviceEffect[this.subPixelOffsets!.Length];
@@ -116,8 +126,9 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
         {
             ScenePositionEffect scenePosEffect = new ScenePositionEffect(deviceContext);
 
-            this.subPxScenePosEffects[i] = new AddConstEffect(deviceContext);
+            this.subPxScenePosEffects[i] = new ArithmeticConstEffect(deviceContext);
             this.subPxScenePosEffects[i].Properties.Input.Set(scenePosEffect);
+            this.subPxScenePosEffects[i].Properties.Operator.SetValue(ArithmeticOperator.Add);
 
             this.polarInversionEffects[i] = deviceContext.CreateEffect(this.polarInversionEffectID);
             this.polarInversionEffects[i].SetInput(0, this.subPxScenePosEffects[i]);
@@ -133,9 +144,10 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
             compositeEffect.SetInput(i, this.mandelleavesShaderEffects[i]);
         }
 
-        MultiplyConstEffect output = new MultiplyConstEffect(deviceContext);
+        ArithmeticConstEffect output = new ArithmeticConstEffect(deviceContext);
         output.Properties.Input.Set(compositeEffect);
-        output.Properties.Value.SetValue((float)(1.0 / this.subPixelOffsets.Length));
+        output.Properties.Operator.SetValue(ArithmeticOperator.Multiply);
+        output.Properties.Value.SetValue(new Vector4Float((float)(1.0 / this.subPixelOffsets.Length)));
 
         return output;
     }

@@ -85,7 +85,7 @@ internal sealed partial class WaveyTransformEffect
         this.sampleMapRenderer.SetInput(this.SourceImage);
         this.sampleMapRenderer.SampleMapCount = 1;
         this.sampleMapRenderer.SetSampleMap(0, this.sampleMapEffect);
-        this.sampleMapRenderer.ExtendMode = SampleMapExtendMode.Mirror;
+        this.sampleMapRenderer.EdgeMode = SampleMapEdgeMode.Mirror;
 
         return this.sampleMapRenderer.GetOutput();
     }

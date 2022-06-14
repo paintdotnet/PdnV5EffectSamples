@@ -81,7 +81,7 @@ internal sealed partial class NightCircuitShaderEffect
     private Guid ieeeRelaxedEffectID;
     private Guid ieeeStrictEffectID;
     private Vector2Float[]? subPixelOffsets;
-    private AddConstEffect[]? subPxScenePosEffects;
+    private ArithmeticConstEffect[]? subPxScenePosEffects;
     private IDeviceEffect[]? pixelShaderEffects;
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
@@ -129,7 +129,7 @@ internal sealed partial class NightCircuitShaderEffect
         compositeEffect.InputCount = this.subPixelOffsets.Length;
         compositeEffect.Properties.Mode.SetValue(CompositeMode.Plus);
 
-        this.subPxScenePosEffects = new AddConstEffect[this.subPixelOffsets.Length];
+        this.subPxScenePosEffects = new ArithmeticConstEffect[this.subPixelOffsets.Length];
         this.pixelShaderEffects = new IDeviceEffect[this.subPixelOffsets.Length];
         for (int i = 0; i < this.pixelShaderEffects.Length; ++i)
         {
@@ -144,8 +144,9 @@ internal sealed partial class NightCircuitShaderEffect
 
             using ScenePositionEffect scenePosEffect = new ScenePositionEffect(deviceContext);
 
-            this.subPxScenePosEffects[i] = new AddConstEffect(deviceContext);
+            this.subPxScenePosEffects[i] = new ArithmeticConstEffect(deviceContext);
             this.subPxScenePosEffects[i]!.Properties.Input.Set(scenePosEffect);
+            this.subPxScenePosEffects[i]!.Properties.Operator.SetValue(ArithmeticOperator.Add);
             this.subPxScenePosEffects[i]!.Properties.Value.SetValue(new Vector4Float(this.subPixelOffsets[i], 0, 0));
 
             this.pixelShaderEffects[i] = deviceContext.CreateEffect(ieeeStrict ? this.ieeeStrictEffectID : this.ieeeRelaxedEffectID);
@@ -154,9 +155,10 @@ internal sealed partial class NightCircuitShaderEffect
             compositeEffect.SetInput(i, this.pixelShaderEffects[i]);
         }
 
-        MultiplyConstEffect divConstEffect = new MultiplyConstEffect(deviceContext);
+        ArithmeticConstEffect divConstEffect = new ArithmeticConstEffect(deviceContext);
         divConstEffect.Properties.Input.Set(compositeEffect);
-        divConstEffect.Properties.Value.SetValue((float)(1.0 / this.subPixelOffsets.Length));
+        divConstEffect.Properties.Operator.SetValue(ArithmeticOperator.Multiply);
+        divConstEffect.Properties.Value.SetValue(new Vector4Float((float)(1.0 / this.subPixelOffsets.Length)));
 
         return divConstEffect;
     }

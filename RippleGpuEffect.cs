@@ -127,7 +127,7 @@ internal sealed partial class RippleGpuEffect
 
         this.sampleMapRenderer = SampleMapRenderer.Create(deviceContext, this.SourceSize);
         this.sampleMapRenderer.SetInput(this.SourceImage);
-        this.sampleMapRenderer.ExtendMode = SampleMapExtendMode.Clamp;
+        this.sampleMapRenderer.EdgeMode = SampleMapEdgeMode.Clamp;
 
         Vector2Float[] sampleOffsets = EffectHelpers.GetRgssOffsets(this.quality);
         this.sampleMapRenderer.SampleMapCount = sampleOffsets.Length;
@@ -136,14 +136,15 @@ internal sealed partial class RippleGpuEffect
         {
             ScenePositionEffect scenePosSampleMap = new ScenePositionEffect(deviceContext);
 
-            AddConstEffect scenePosRgssSampleMap = new AddConstEffect(deviceContext);
+            ArithmeticConstEffect scenePosRgssSampleMap = new ArithmeticConstEffect(deviceContext);
             scenePosRgssSampleMap.Properties.Input.Set(scenePosSampleMap);
+            scenePosRgssSampleMap.Properties.Operator.SetValue(ArithmeticOperator.Add);
             scenePosRgssSampleMap.Properties.Value.SetValue(new Vector4Float(sampleOffsets[i], 0, 0));
 
             IDeviceEffect rippleSampleMap = deviceContext.CreateEffect(this.sampleMapEffectID);
             rippleSampleMap.SetInput(0, scenePosRgssSampleMap);
             rippleSampleMap.SetValue(
-                0, // TODO: there should be a D2D1PixelShaderEffectProperty.ConstantBuffer, see https://github.com/Sergio0694/ComputeSharp/issues/237
+                D2D1PixelShaderEffectProperty.ConstantBuffer,
                 PropertyType.Blob,
                 D2D1PixelShader.GetConstantBuffer(new SampleMapShader(
                     (float)this.sizePx,
