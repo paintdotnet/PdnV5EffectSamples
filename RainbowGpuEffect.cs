@@ -53,7 +53,7 @@ internal sealed class RainbowGpuEffect
         SizeInt32 size = this.SourceSize;
 
         // D2D1_GRADIENT_STOP: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/ns-d2d1-d2d1_gradient_stop
-        GradientStopFloat[] gradientStops = new GradientStopFloat[361];
+        GradientStop[] gradientStops = new GradientStop[361];
         for (int i = 0; i < gradientStops.Length; ++i)
         {
             int hue = ((i + 360 - this.hueOffset) % 360);
@@ -61,7 +61,7 @@ internal sealed class RainbowGpuEffect
             // ColorHsv96Float is a Paint.NET primitive. It can be converted to an ColorRgb96Float
             // with the ToRgb() method, and then cast to ColorRgba128Float.
             ColorHsv96Float hsv = new ColorHsv96Float(hue, 100, 100);
-            gradientStops[i] = new GradientStopFloat((float)i / 360.0f, (ColorRgba128Float)hsv.ToRgb());
+            gradientStops[i] = new GradientStop((float)i / 360.0f, (ColorRgba128Float)hsv.ToRgb());
         }
 
         // ID2D1GradientStopCollection: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/nn-d2d1-id2d1gradientstopcollection
