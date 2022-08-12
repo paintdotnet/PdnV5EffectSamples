@@ -63,6 +63,10 @@ internal sealed partial class HueRotateEffectAdvanced
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
+        // In the "advanced" implemention of OnCreateOutput(), we will create all the Direct2D effects and link
+        // them together to form the effect graph. We will set the properties on the effects that not change
+        // based on the token properties (rom the UI).
+
         // 1. Convert SourceImage from premultiplied RGBA to HSVA
         // Direct2D's RGB-to-Hue effect: https://docs.microsoft.com/en-us/windows/win32/direct2d/rgb-to-hue-effect
         using RgbToHueEffect rgbToHueEffect = new RgbToHueEffect(deviceContext);
@@ -100,6 +104,10 @@ internal sealed partial class HueRotateEffectAdvanced
 
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
     {
+        // In the "advanced" implementation of OnUpdateOutput(), we will read the property values from the token,
+        // and apply them to the effects in the effect graph. We cannot change the effect graph -- if we need to
+        // do that, we need to return InspectTokenAction.RecreateOutput  from OnInspectTokenChanges().
+
         double angle = this.Token.GetProperty<DoubleProperty>(PropertyNames.Angle).Value;
         this.shaderEffect!.SetValue(
             D2D1PixelShaderEffectProperty.ConstantBuffer,
