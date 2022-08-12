@@ -1,26 +1,18 @@
 ﻿using ComputeSharp;
 using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
-using PaintDotNet;
 using PaintDotNet.Direct2D1;
-using PaintDotNet.Direct2D1.Effects;
-using PaintDotNet.Effects;
-using PaintDotNet.Effects.Gpu;
 using PaintDotNet.Imaging;
-using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
 using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 // This sample illustrates how to use a simple output-only shader. It renders a "zone plate" test pattern
 // https://en.wikipedia.org/wiki/Zone_plate
 // Code based on: https://github.com/saucecontrol/PhotoSauce/blob/v0.13.0/src/MagicScaler/Magic/ZonePlatePixelSource.cs
 
 namespace PaintDotNet.Effects.Gpu.Samples;
-
-using IDeviceContext = PaintDotNet.Direct2D1.IDeviceContext;
 
 internal sealed partial class ZonePlateShaderEffect
     : PropertyBasedGpuImageEffect
