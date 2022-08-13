@@ -1,11 +1,6 @@
-﻿using PaintDotNet;
-using PaintDotNet.Direct2D1;
+﻿using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
-using PaintDotNet.Effects;
-using PaintDotNet.Effects.Gpu;
-using PaintDotNet.Imaging;
 using PaintDotNet.PropertySystem;
-using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
 
