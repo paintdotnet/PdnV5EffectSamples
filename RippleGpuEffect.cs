@@ -107,7 +107,7 @@ internal sealed partial class RippleGpuEffect
     private double spread;
     private int quality;
     private Point2Double centerPoint;
-    private ISampleMapRenderer? sampleMapRenderer;
+    private SampleMapRenderer? sampleMapRenderer;
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
     {
@@ -125,7 +125,7 @@ internal sealed partial class RippleGpuEffect
         // The # of samples is equal to the square of the quality value, so a quality value of [1,2,3,4,...,8]
         // will use [1,4,9,16,...,64] samples.
 
-        this.sampleMapRenderer = SampleMapRenderer.Create(deviceContext, this.SourceSize);
+        this.sampleMapRenderer = new SampleMapRenderer(deviceContext, this.SourceSize);
         this.sampleMapRenderer.SetInput(this.SourceImage);
         this.sampleMapRenderer.EdgeMode = SampleMapEdgeMode.Clamp;
 

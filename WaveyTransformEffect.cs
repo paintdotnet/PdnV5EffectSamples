@@ -16,8 +16,7 @@ using System.Collections.Generic;
 // This sample illustrates how to use a shader that outputs a "sample map" to use with SampleMapRenderer.
 // Sample maps are often used to implement "distortion" effects.
 // Using SampleMapRenderer is recommended, versus rolling your own, as it is complicated to get it working
-// correctly with large images due to Direct2D's limitation of 4K x 4K intermediate rendering textures.
-// (larger intermediates would help with that, but would also consume vast amounts of memory)
+// correctly with large images due to Direct2D's effects rendering architecture.
 
 namespace PaintDotNet.Effects.Gpu.Samples;
 
@@ -51,7 +50,7 @@ internal sealed partial class WaveyTransformEffect
     private SampleMapShader shader;
     private Guid shaderEffectID;
     private IDeviceEffect? sampleMapEffect;
-    private ISampleMapRenderer? sampleMapRenderer;
+    private SampleMapRenderer? sampleMapRenderer;
 
     protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
     {
@@ -81,7 +80,7 @@ internal sealed partial class WaveyTransformEffect
     {
         this.sampleMapEffect = deviceContext.CreateEffect(this.shaderEffectID);
 
-        this.sampleMapRenderer = SampleMapRenderer.Create(deviceContext, this.SourceSize);
+        this.sampleMapRenderer = new SampleMapRenderer(deviceContext, this.SourceSize);
         this.sampleMapRenderer.SetInput(this.SourceImage);
         this.sampleMapRenderer.SampleMapCount = 1;
         this.sampleMapRenderer.SetSampleMap(0, this.sampleMapEffect);
