@@ -208,7 +208,7 @@ internal sealed partial class RippleGpuEffect
             // The fourth component of the return value is currently discarded, but in a later build it will be possible
             // to pass that value into a post-processor (e.g. to apply the lighting value that's commented out above)
             float2 samplePos = scenePos + inputOffset;
-            return new float4(samplePos, 1, 0);
+            return new float4(samplePos, 1, 1);
         }
     }
 }
