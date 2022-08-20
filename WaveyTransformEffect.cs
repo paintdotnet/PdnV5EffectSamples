@@ -142,7 +142,7 @@ internal sealed partial class WaveyTransformEffect
             // Usually you should just set A to 1, but you can also use it to modulate the alpha/transparency of
             // the sampled pixel.
             // The sampled pixel will then be drawn at the current scene position.
-            return new float4(scenePos + dxdy, 1, 0);
+            return new float4(scenePos + dxdy, 1, 1);
         }
     }
 }
