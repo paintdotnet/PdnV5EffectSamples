@@ -36,10 +36,12 @@ internal sealed partial class WaveyTransformEffect
             })
     {
     }
+
     private enum PropertyNames
     {
         Scale
     }
+
     protected override PropertyCollection OnCreatePropertyCollection()
     {
         List<Property> properties = new List<Property>();
