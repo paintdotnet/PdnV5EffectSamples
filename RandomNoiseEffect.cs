@@ -159,7 +159,7 @@ internal sealed partial class RandomNoiseEffect
 
     [D2DInputCount(0)]
     [D2DRequiresScenePosition]
-    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [AutoConstructor]
     private readonly partial struct Shader
         : ID2D1PixelShader

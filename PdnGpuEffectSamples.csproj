@@ -9,9 +9,10 @@
     <!-- This is necessary so that the build copies the version of nuget packages we're referencing,
          instead of copying the ones that Paint.NET is using (which may be trimmed and/or a different version) -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.0-alpha.25" />
+    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.0-alpha.27" />
   </ItemGroup>
   <ItemGroup>
     <!-- Be sure to set Private=False (aka CopyLocal=false) on the Paint.NET assemblies 

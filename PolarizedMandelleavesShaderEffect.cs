@@ -73,7 +73,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     private Guid mandelleavesEffectID;
 
     private Vector2Float[]? subPixelOffsets;
-    private ArithmeticConstEffect[]? subPxScenePosEffects;
+    private HlslBinaryOperatorEffect[]? subPxScenePosEffects;
     private IDeviceEffect[]? polarInversionEffects;
     private IDeviceEffect[]? sampleMapMirrorEffects;
     private IDeviceEffect[]? mandelleavesShaderEffects;
@@ -118,7 +118,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
         compositeEffect.InputCount = this.subPixelOffsets.Length;
         compositeEffect.Properties.Mode.SetValue(CompositeMode.Plus);
 
-        this.subPxScenePosEffects = new ArithmeticConstEffect[this.subPixelOffsets!.Length];
+        this.subPxScenePosEffects = new HlslBinaryOperatorEffect[this.subPixelOffsets!.Length];
         this.polarInversionEffects = new IDeviceEffect[this.subPixelOffsets!.Length];
         this.sampleMapMirrorEffects = new IDeviceEffect[this.subPixelOffsets!.Length];
         this.mandelleavesShaderEffects = new IDeviceEffect[this.subPixelOffsets!.Length];
@@ -126,9 +126,12 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
         {
             ScenePositionEffect scenePosEffect = new ScenePositionEffect(deviceContext);
 
-            this.subPxScenePosEffects[i] = new ArithmeticConstEffect(deviceContext);
-            this.subPxScenePosEffects[i].Properties.Input.Set(scenePosEffect);
-            this.subPxScenePosEffects[i].Properties.Operator.SetValue(ArithmeticOperator.Add);
+            this.subPxScenePosEffects[i] = new HlslBinaryOperatorEffect(deviceContext);
+            this.subPxScenePosEffects[i].Properties.Parameter1.SetValue(HlslEffectParameter.Input);
+            this.subPxScenePosEffects[i].Properties.Input1.Set(scenePosEffect);
+            this.subPxScenePosEffects[i].Properties.Operator.SetValue(HlslBinaryOperator.Add);
+            this.subPxScenePosEffects[i].Properties.Parameter2.SetValue(HlslEffectParameter.Value);
+            // The Value2 property will be set during OnUpdateOutput()
 
             this.polarInversionEffects[i] = deviceContext.CreateEffect(this.polarInversionEffectID);
             this.polarInversionEffects[i].SetInput(0, this.subPxScenePosEffects[i]);
@@ -144,10 +147,14 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
             compositeEffect.SetInput(i, this.mandelleavesShaderEffects[i]);
         }
 
-        ArithmeticConstEffect output = new ArithmeticConstEffect(deviceContext);
-        output.Properties.Input.Set(compositeEffect);
-        output.Properties.Operator.SetValue(ArithmeticOperator.Multiply);
-        output.Properties.Value.SetValue(new Vector4Float((float)(1.0 / this.subPixelOffsets.Length)));
+        // After accumulating the samples, take the average by dividing by the number of samples
+        // Use multiplication of (1/n) instead of division because division is relatively slow
+        HlslBinaryOperatorEffect output = new HlslBinaryOperatorEffect(deviceContext);
+        output.Properties.Parameter1.SetValue(HlslEffectParameter.Input);
+        output.Properties.Input1.Set(compositeEffect);
+        output.Properties.Operator.SetValue(HlslBinaryOperator.Multiply);
+        output.Properties.Parameter2.SetValue(HlslEffectParameter.Value);
+        output.Properties.Value2.SetValue(new Vector4Float((float)(1.0 / this.subPixelOffsets.Length)));
 
         return output;
     }
@@ -166,7 +173,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
 
         for (int i = 0; i < this.subPixelOffsets!.Length; ++i)
         {
-            this.subPxScenePosEffects![i].Properties.Value.SetValue(new Vector4Float(this.subPixelOffsets![i], 0, 0));
+            this.subPxScenePosEffects![i].Properties.Value2.SetValue(new Vector4Float(this.subPixelOffsets![i], 0, 0));
 
             this.polarInversionEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
@@ -199,7 +206,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)]
     [D2DOutputBuffer(D2D1BufferPrecision.Float32, D2D1ChannelDepth.Four)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking | D2D1CompileOptions.IeeeStrictness)]
-    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [AutoConstructor]
     private readonly partial struct PolarInversionShader
         : ID2D1PixelShader
@@ -228,7 +235,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)]
     [D2DOutputBuffer(D2D1BufferPrecision.Float32, D2D1ChannelDepth.Four)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking | D2D1CompileOptions.IeeeStrictness)]
-    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [AutoConstructor]
     private readonly partial struct SampleMapMirrorShader
         : ID2D1PixelShader
@@ -257,7 +264,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     [D2DInputSimple(0)]
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)]
     [D2DRequiresScenePosition]
-    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking | D2D1CompileOptions.IeeeStrictness)]
     [AutoConstructor]
     private readonly partial struct MandelleavesShader

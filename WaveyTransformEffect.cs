@@ -114,7 +114,7 @@ internal sealed partial class WaveyTransformEffect
 
     [D2DInputCount(0)]
     [D2DRequiresScenePosition]
-    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [AutoConstructor]
     private readonly partial struct SampleMapShader
         : ID2D1PixelShader

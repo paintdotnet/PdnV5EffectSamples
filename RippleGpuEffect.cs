@@ -10,6 +10,7 @@
 using ComputeSharp;
 using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
+using PaintDotNet.ComponentModel;
 using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
 using PaintDotNet.IndirectUI;
@@ -50,7 +51,7 @@ internal sealed partial class RippleGpuEffect
         Quality
     }
 
-    protected override PropertyCollection OnCreatePropertyCollection()
+    protected unsafe override PropertyCollection OnCreatePropertyCollection()
     {
         List<Property> properties = new List<Property>();
 
@@ -136,10 +137,12 @@ internal sealed partial class RippleGpuEffect
         {
             ScenePositionEffect scenePosSampleMap = new ScenePositionEffect(deviceContext);
 
-            ArithmeticConstEffect scenePosRgssSampleMap = new ArithmeticConstEffect(deviceContext);
-            scenePosRgssSampleMap.Properties.Input.Set(scenePosSampleMap);
-            scenePosRgssSampleMap.Properties.Operator.SetValue(ArithmeticOperator.Add);
-            scenePosRgssSampleMap.Properties.Value.SetValue(new Vector4Float(sampleOffsets[i], 0, 0));
+            HlslBinaryOperatorEffect scenePosRgssSampleMap = new HlslBinaryOperatorEffect(deviceContext);
+            scenePosRgssSampleMap.Properties.Parameter1.SetValue(HlslEffectParameter.Input);
+            scenePosRgssSampleMap.Properties.Input1.Set(scenePosSampleMap);
+            scenePosRgssSampleMap.Properties.Operator.SetValue(HlslBinaryOperator.Add);
+            scenePosRgssSampleMap.Properties.Parameter2.SetValue(HlslEffectParameter.Value);
+            scenePosRgssSampleMap.Properties.Value2.SetValue(new Vector4Float(sampleOffsets[i], 0, 0));
 
             IDeviceEffect rippleSampleMap = deviceContext.CreateEffect(this.sampleMapEffectID);
             rippleSampleMap.SetInput(0, scenePosRgssSampleMap);
@@ -165,7 +168,7 @@ internal sealed partial class RippleGpuEffect
     [D2DInputCount(1)]
     [D2DInputSimple(0)]
     [D2DInputDescription(0, D2D1Filter.MinLinearMagMipPoint)]
-    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [AutoConstructor]
     private readonly partial struct SampleMapShader
         : ID2D1PixelShader

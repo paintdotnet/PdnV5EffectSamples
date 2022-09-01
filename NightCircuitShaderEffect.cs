@@ -81,7 +81,7 @@ internal sealed partial class NightCircuitShaderEffect
     private Guid ieeeRelaxedEffectID;
     private Guid ieeeStrictEffectID;
     private Vector2Float[]? subPixelOffsets;
-    private ArithmeticConstEffect[]? subPxScenePosEffects;
+    private HlslBinaryOperatorEffect[]? subPxScenePosEffects;
     private IDeviceEffect[]? pixelShaderEffects;
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
@@ -129,7 +129,7 @@ internal sealed partial class NightCircuitShaderEffect
         compositeEffect.InputCount = this.subPixelOffsets.Length;
         compositeEffect.Properties.Mode.SetValue(CompositeMode.Plus);
 
-        this.subPxScenePosEffects = new ArithmeticConstEffect[this.subPixelOffsets.Length];
+        this.subPxScenePosEffects = new HlslBinaryOperatorEffect[this.subPixelOffsets.Length];
         this.pixelShaderEffects = new IDeviceEffect[this.subPixelOffsets.Length];
         for (int i = 0; i < this.pixelShaderEffects.Length; ++i)
         {
@@ -144,10 +144,11 @@ internal sealed partial class NightCircuitShaderEffect
 
             using ScenePositionEffect scenePosEffect = new ScenePositionEffect(deviceContext);
 
-            this.subPxScenePosEffects[i] = new ArithmeticConstEffect(deviceContext);
-            this.subPxScenePosEffects[i]!.Properties.Input.Set(scenePosEffect);
-            this.subPxScenePosEffects[i]!.Properties.Operator.SetValue(ArithmeticOperator.Add);
-            this.subPxScenePosEffects[i]!.Properties.Value.SetValue(new Vector4Float(this.subPixelOffsets[i], 0, 0));
+            this.subPxScenePosEffects[i] = new HlslBinaryOperatorEffect(
+                deviceContext,
+                scenePosEffect,
+                HlslBinaryOperator.Add,
+                new FloodEffect(deviceContext, new Vector4Float(this.subPixelOffsets[i], 0, 0)));
 
             this.pixelShaderEffects[i] = deviceContext.CreateEffect(ieeeStrict ? this.ieeeStrictEffectID : this.ieeeRelaxedEffectID);
             this.pixelShaderEffects[i]!.SetInput(0, this.subPxScenePosEffects[i]);
@@ -155,10 +156,14 @@ internal sealed partial class NightCircuitShaderEffect
             compositeEffect.SetInput(i, this.pixelShaderEffects[i]);
         }
 
-        ArithmeticConstEffect divConstEffect = new ArithmeticConstEffect(deviceContext);
-        divConstEffect.Properties.Input.Set(compositeEffect);
-        divConstEffect.Properties.Operator.SetValue(ArithmeticOperator.Multiply);
-        divConstEffect.Properties.Value.SetValue(new Vector4Float((float)(1.0 / this.subPixelOffsets.Length)));
+        // After accumulating the samples, take the average by dividing by the number of samples
+        // Use multiplication of (1/n) instead of division because division is relatively slow
+        HlslBinaryOperatorEffect divConstEffect = new HlslBinaryOperatorEffect(deviceContext);
+        divConstEffect.Properties.Parameter1.SetValue(HlslEffectParameter.Input);
+        divConstEffect.Properties.Input1.Set(compositeEffect);
+        divConstEffect.Properties.Operator.SetValue(HlslBinaryOperator.Multiply);
+        divConstEffect.Properties.Parameter2.SetValue(HlslEffectParameter.Value);
+        divConstEffect.Properties.Value2.SetValue(new Vector4Float((float)(1.0 / this.subPixelOffsets.Length)));
 
         return divConstEffect;
     }
@@ -188,7 +193,7 @@ internal sealed partial class NightCircuitShaderEffect
     [D2DInputSimple(0)]
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)]
     [D2DRequiresScenePosition]
-    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking)]
     [AutoConstructor]
     private partial struct IeeeRelaxedShader
@@ -215,7 +220,7 @@ internal sealed partial class NightCircuitShaderEffect
     [D2DInputSimple(0)]
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)]
     [D2DRequiresScenePosition]
-    [D2DEmbeddedBytecode(D2D1ShaderProfile.PixelShader50)]
+    [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking | D2D1CompileOptions.IeeeStrictness)]
     [AutoConstructor]
     private partial struct IeeeStrictShader
