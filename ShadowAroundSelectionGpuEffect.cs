@@ -89,16 +89,13 @@ internal sealed class ShadowAroundSelectionGpuEffect
         IGeometry selectionGeometry = this.EnvironmentParameters.Selection.GetGeometry(deviceContext.Factory);
 
         ICommandList selectionOutline = deviceContext.CreateCommandList();
-        using (deviceContext.UseTarget(selectionOutline))
+        using (selectionOutline.UseBeginDraw(deviceContext))
         {
-            using (deviceContext.UseBeginDraw())
-            {
-                deviceContext.Clear();
-                ISolidColorBrush brush = deviceContext.CreateSolidColorBrush(Colors.Black);
-                deviceContext.DrawGeometry(selectionGeometry, brush, this.blurRadius / 2.0f);
-            }
+            // Note that we issue drawing commands to the deviceContext. The command list becomes
+            // the device context's current "target" that receives the drawing commands.
 
-            selectionOutline.Close();
+            ISolidColorBrush brush = deviceContext.CreateSolidColorBrush(Colors.Black);
+            deviceContext.DrawGeometry(selectionGeometry, brush, this.blurRadius / 2.0f);
         }
 
         // Create a shadow effect that will blur the image of the stroked geometry outline
