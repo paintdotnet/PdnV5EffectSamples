@@ -162,7 +162,7 @@ internal sealed partial class RippleGpuEffect
             this.sampleMapRenderer.SetSampleMap(i, rippleSampleMap);
         }
 
-        return this.sampleMapRenderer.GetOutput();
+        return this.sampleMapRenderer;
     }
 
     [D2DInputCount(1)]
