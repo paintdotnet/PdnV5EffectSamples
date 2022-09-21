@@ -80,7 +80,7 @@ internal sealed partial class SquareBlurGpuEffect
         public readonly int radius;
 
         // When dividing by a value that is computed from another constants (in this case, radius squared),
-        // it's a good idea to also compute its reciprocal so that multiplication can be used instead of
+        // it's a good idea to precompute its reciprocal so that multiplication can be used instead of
         // the more expensive division.
         private readonly float oneOverRadiusSquared;
 
