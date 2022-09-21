@@ -24,7 +24,6 @@ internal sealed partial class HueRotateEffectAdvanced
     public HueRotateEffectAdvanced()
         : base(
             "Hue Rotate (GPU Sample, Advanced Implementation)",
-            null, // no menu icon
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -70,7 +69,7 @@ internal sealed partial class HueRotateEffectAdvanced
         // 1. Convert SourceImage from premultiplied RGBA to HSVA
         // Direct2D's RGB-to-Hue effect: https://docs.microsoft.com/en-us/windows/win32/direct2d/rgb-to-hue-effect
         using RgbToHueEffect rgbToHueEffect = new RgbToHueEffect(deviceContext);
-        rgbToHueEffect.Properties.Input.Set(this.SourceImage);
+        rgbToHueEffect.Properties.Input.Set(this.Environment.SourceImage);
         rgbToHueEffect.Properties.OutputColorSpace.SetValue(RgbToHueOutputColorSpace.HueSaturationValue);
 
         // 2. Use our own pixel shader to modify the hue (which is stored in the R channel)

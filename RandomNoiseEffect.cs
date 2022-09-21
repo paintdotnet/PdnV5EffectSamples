@@ -20,7 +20,6 @@ internal sealed partial class RandomNoiseEffect
     public RandomNoiseEffect()
         : base(
             "Random Noise (GPU Sample)",
-            null, // no icon
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -126,7 +125,7 @@ internal sealed partial class RandomNoiseEffect
         this.coloredShaderEffect.SetInput((int)ColorMode.Grayscale, this.grayscaleEffect);
 
         this.blendEffect = new BlendEffect(deviceContext);
-        this.blendEffect.Properties.Destination.Set(this.SourceImage);
+        this.blendEffect.Properties.Destination.Set(this.Environment.SourceImage);
         this.blendEffect.Properties.Source.Set(this.coloredShaderEffect);
 
         this.outputEffect = new InputSelectorEffect(deviceContext);

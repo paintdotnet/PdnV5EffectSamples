@@ -22,7 +22,6 @@ internal sealed partial class SquareBlurGpuEffect
     public SquareBlurGpuEffect()
         : base(
             "Square Blur (GPU Sample)",
-            null,
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -48,17 +47,23 @@ internal sealed partial class SquareBlurGpuEffect
     protected override IDeviceImage OnCreateOutput(Direct2D1.IDeviceContext deviceContext)
     {
         int radius = this.Token.GetProperty<Int32Property>(PropertyNames.Radius).Value;
+        if (radius == 0)
+        {
+            return this.Environment.SourceImage;
+        }
 
         deviceContext.Factory.RegisterEffectFromBlob(
             D2D1PixelShaderEffect.GetRegistrationBlob<SquareBlurShader, SquareBlurTransformMapper>(out Guid effectID));
 
         IDeviceEffect shaderEffect = deviceContext.CreateEffect(effectID);
 
-        shaderEffect.SetInput(0, this.SourceImage);
+        shaderEffect.SetInput(0, this.Environment.SourceImage);
 
         shaderEffect.SetValue(
             D2D1PixelShaderEffectProperty.ConstantBuffer,
-            new SquareBlurShader(radius));
+            new SquareBlurShader(
+                radius,
+                (float)(1.0 / (radius * radius))));
 
         return shaderEffect;
     }
@@ -73,6 +78,11 @@ internal sealed partial class SquareBlurGpuEffect
     {
         // 'public' so that the transform mapper can read it
         public readonly int radius;
+
+        // When dividing by a value that is computed from another constants (in this case, radius squared),
+        // it's a good idea to also compute its reciprocal so that multiplication can be used instead of
+        // the more expensive division.
+        private readonly float oneOverRadiusSquared;
 
         public float4 Execute()
         {
@@ -90,7 +100,7 @@ internal sealed partial class SquareBlurGpuEffect
                 }
             }
 
-            return samples / (this.radius * this.radius);
+            return samples * this.oneOverRadiusSquared;
         }
     }
 

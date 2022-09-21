@@ -31,7 +31,6 @@ internal sealed partial class RippleGpuEffect
     public RippleGpuEffect()
         : base(
             "Ripple (GPU Sample)",
-            null, // no icon
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -77,10 +76,10 @@ internal sealed partial class RippleGpuEffect
         return controlInfo;
     }
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
+    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
     {
-        double width = this.SourceSize.Width;
-        double height = this.SourceSize.Height;
+        double width = this.Environment.CanvasSize.Width;
+        double height = this.Environment.CanvasSize.Height;
 
         double size = newToken.GetProperty<DoubleProperty>(PropertyNames.Size).Value;
         this.sizePx = size * (Math.Max(width, height) / 2.0);
@@ -97,7 +96,7 @@ internal sealed partial class RippleGpuEffect
 
         this.quality = newToken.GetProperty<Int32Property>(PropertyNames.Quality).Value;
 
-        base.OnSetRenderInfo(newToken);
+        base.OnSetToken(newToken);
     }
 
     private Guid sampleMapEffectID;
@@ -126,8 +125,8 @@ internal sealed partial class RippleGpuEffect
         // The # of samples is equal to the square of the quality value, so a quality value of [1,2,3,4,...,8]
         // will use [1,4,9,16,...,64] samples.
 
-        this.sampleMapRenderer = new SampleMapRenderer(deviceContext, this.SourceSize);
-        this.sampleMapRenderer.SetInput(this.SourceImage);
+        this.sampleMapRenderer = new SampleMapRenderer(deviceContext, this.Environment.CanvasSize);
+        this.sampleMapRenderer.SetInput(this.Environment.SourceImage);
         this.sampleMapRenderer.EdgeMode = SampleMapEdgeMode.Clamp;
 
         Vector2Float[] sampleOffsets = EffectHelpers.GetRgssOffsets(this.quality);

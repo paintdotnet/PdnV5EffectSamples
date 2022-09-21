@@ -30,7 +30,6 @@ internal sealed class OutlinedTextWithShadowGpuEffect
     public OutlinedTextWithShadowGpuEffect()
         : base(
             "Outlined Text with Shadow (GPU Sample)",
-            null, // no icon
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -91,7 +90,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         return configUI;
     }
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
+    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
     {
         this.text = newToken.GetProperty<StringProperty>(PropertyNames.Text).Value;
         this.fontName = (string)newToken.GetProperty<StaticListChoiceProperty>(PropertyNames.FontName).Value;
@@ -99,7 +98,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         this.outlineThickness = newToken.GetProperty<Int32Property>(PropertyNames.OutlineThickness).Value;
         this.rotationAngle = newToken.GetProperty<DoubleProperty>(PropertyNames.RotationAngle).Value;
         this.shadowBlurRadius = newToken.GetProperty<Int32Property>(PropertyNames.ShadowBlurRadius).Value;
-        base.OnSetRenderInfo(newToken);
+        base.OnSetToken(newToken);
     }
 
     private string? text;
@@ -111,7 +110,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        SizeInt32 size = this.EnvironmentParameters.SourceSurface.Size;
+        SizeInt32 size = this.Environment.CanvasSize;
 
         IDirect2DFactory d2dFactory = this.Services.GetService<IDirect2DFactory>();
         IDirectWriteFactory dwFactory = this.Services.GetService<IDirectWriteFactory>();
@@ -153,7 +152,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
 
         CompositeEffect compositeEffect = new CompositeEffect(deviceContext);
         compositeEffect.Properties.Mode.SetValue(CompositeMode.SourceOver);
-        compositeEffect.Properties.Destination.Set(this.SourceImage); // use original layer contents as background
+        compositeEffect.Properties.Destination.Set(this.Environment.SourceImage); // use original layer contents as background
         compositeEffect.Properties.Sources.Add(shadowEffect);
         compositeEffect.Properties.Sources.Add(textImage);
 

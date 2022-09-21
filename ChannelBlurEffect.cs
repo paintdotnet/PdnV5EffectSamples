@@ -19,7 +19,6 @@ internal sealed class ChannelBlurEffect
     public ChannelBlurEffect()
         : base(
             "Channel Blur (GPU Sample)",
-            null, // no menu icon
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -54,13 +53,13 @@ internal sealed class ChannelBlurEffect
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
         this.blurEffect = new GaussianBlurEffect(deviceContext);
-        this.blurEffect.Properties.Input.Set(this.SourceImage);
+        this.blurEffect.Properties.Input.Set(this.Environment.SourceImage);
         this.blurEffect.Properties.BorderMode.SetValue(BorderMode.Hard);
         this.blurEffect.Properties.Optimization.SetValue(GaussianBlurOptimization.Quality);
 
         this.swizzleEffect = new InputSwizzleEffect(deviceContext);
         this.swizzleEffect.InputCount = 2;
-        this.swizzleEffect.SetInput(0, this.SourceImage);
+        this.swizzleEffect.SetInput(0, this.Environment.SourceImage);
         this.swizzleEffect.SetInput(1, this.blurEffect);
 
         return this.swizzleEffect;

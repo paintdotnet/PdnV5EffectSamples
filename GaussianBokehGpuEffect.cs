@@ -20,7 +20,6 @@ internal sealed class GaussianBokehGpuEffect
     public GaussianBokehGpuEffect()
         : base(
             "Gaussian Bokeh (GPU Sample)",
-            null,
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -59,12 +58,12 @@ internal sealed class GaussianBokehGpuEffect
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
         this.gaussianBlurEffect = new GaussianBlurEffect(deviceContext);
-        this.gaussianBlurEffect.Properties.Input.Set(this.SourceImage);
+        this.gaussianBlurEffect.Properties.Input.Set(this.Environment.SourceImage);
         this.gaussianBlurEffect.Properties.BorderMode.SetValue(BorderMode.Hard);
         this.gaussianBlurEffect.Properties.Optimization.SetValue(GaussianBlurOptimization.Quality);
 
         this.bokehEffect = new PdnBokehEffect(deviceContext);
-        this.bokehEffect.Properties.Input.Set(this.SourceImage);
+        this.bokehEffect.Properties.Input.Set(this.Environment.SourceImage);
         this.bokehEffect.Properties.EdgeMode.SetValue(PdnBokehEdgeMode.Clamp);
 
         this.crossFadeEffect = new CrossFadeEffect(deviceContext);

@@ -26,7 +26,6 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     public PolarizedMandelleavesShaderEffect()
         : base(
             "Polarized Mandelleaves (GPU Samples)",
-            null, // no image
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -163,13 +162,13 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     {
         double zoom = this.Token.GetProperty<DoubleProperty>(PropertyNames.FractalZoom).Value;
 
-        double radius = Math.Min(this.SourceSize.Width, this.SourceSize.Height) * 0.5;
+        double radius = Math.Min(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height) * 0.5;
         double radius2 = radius * radius;
         double polarInversionAmount = this.Token.GetProperty<DoubleProperty>(PropertyNames.PolarInversionAmount).Value;
         Vector2Double polarInversionOffset = this.Token.GetProperty<DoubleVectorProperty>(PropertyNames.PolarInversionOffset).Value;
         Vector2Double centerOffset = new Vector2Double(
-            this.SourceSize.Width * (1.0 + polarInversionOffset.X) * 0.5,
-            this.SourceSize.Height * (1.0 + polarInversionOffset.Y) * 0.5);
+            this.Environment.CanvasSize.Width * (1.0 + polarInversionOffset.X) * 0.5,
+            this.Environment.CanvasSize.Height * (1.0 + polarInversionOffset.Y) * 0.5);
 
         for (int i = 0; i < this.subPixelOffsets!.Length; ++i)
         {
@@ -187,13 +186,13 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
                 PropertyType.Blob,
                 D2D1PixelShader.GetConstantBuffer(new SampleMapMirrorShader(
-                    new float2(this.SourceSize.Width, this.SourceSize.Height))));
+                    new float2(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height))));
 
             this.mandelleavesShaderEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
                 PropertyType.Blob,
                 D2D1PixelShader.GetConstantBuffer(new MandelleavesShader(
-                    new Float2(this.SourceSize.Width, this.SourceSize.Height),
+                    new float2(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height),
                     0,
                     (float)(1.0 / zoom))));
         }

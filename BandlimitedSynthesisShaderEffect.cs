@@ -17,7 +17,6 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
     public BandlimitedSynthesisShaderEffect()
         : base(
             "Bandlimited Synthesis Shader (GPU Samples)",
-            null,
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -40,9 +39,9 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
+    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
     {
-        base.OnSetRenderInfo(newToken);
+        base.OnSetToken(newToken);
     }
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
@@ -66,8 +65,8 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
             PropertyType.Blob,
             D2D1PixelShader.GetConstantBuffer(new Shader(
                 new float3(
-                    this.SourceSize.Width,
-                    this.SourceSize.Height,
+                    this.Environment.CanvasSize.Width,
+                    this.Environment.CanvasSize.Height,
                     0),
                 (float)this.Token.GetProperty<DoubleProperty>(PropertyNames.Time).Value)));
 

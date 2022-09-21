@@ -17,7 +17,6 @@ internal sealed class RainbowGpuEffect
     public RainbowGpuEffect()
         : base(
             "Rainbow (GPU Sample)",
-            null, // no icon
             "GPU Samples",
             new GpuDrawingEffectOptions()
             {
@@ -40,17 +39,17 @@ internal sealed class RainbowGpuEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
+    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
     {
         this.hueOffset = newToken.GetProperty<Int32Property>(PropertyNames.HueOffset).Value;
-        base.OnSetRenderInfo(newToken);
+        base.OnSetToken(newToken);
     }
 
     private int hueOffset;
 
     protected override void OnDraw(IDeviceContext dc)
     {
-        SizeInt32 size = this.SourceSize;
+        SizeInt32 size = this.Environment.CanvasSize;
 
         // D2D1_GRADIENT_STOP: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/ns-d2d1-d2d1_gradient_stop
         GradientStop[] gradientStops = new GradientStop[361];

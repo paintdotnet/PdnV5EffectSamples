@@ -28,7 +28,6 @@ internal sealed partial class WaveyTransformEffect
     public WaveyTransformEffect()
         : base(
             "Wavey Transform (GPU Sample)",
-            null, // no icon
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -54,15 +53,15 @@ internal sealed partial class WaveyTransformEffect
     private IDeviceEffect? sampleMapEffect;
     private SampleMapRenderer? sampleMapRenderer;
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
+    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
     {
         double scale = newToken.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
-        SizeInt32 sourceImageSize = this.SourceSize;
+        SizeInt32 sourceImageSize = this.Environment.CanvasSize;
         this.shader = new SampleMapShader(
             new uint2((uint)sourceImageSize.Width, (uint)sourceImageSize.Height),
             (float)scale);
        
-        base.OnSetRenderInfo(newToken);
+        base.OnSetToken(newToken);
     }
 
     protected override InspectTokenAction OnInspectTokenChanges(PropertyBasedEffectConfigToken oldToken, PropertyBasedEffectConfigToken newToken)
@@ -82,8 +81,8 @@ internal sealed partial class WaveyTransformEffect
     {
         this.sampleMapEffect = deviceContext.CreateEffect(this.shaderEffectID);
 
-        this.sampleMapRenderer = new SampleMapRenderer(deviceContext, this.SourceSize);
-        this.sampleMapRenderer.SetInput(this.SourceImage);
+        this.sampleMapRenderer = new SampleMapRenderer(deviceContext, this.Environment.CanvasSize);
+        this.sampleMapRenderer.SetInput(this.Environment.SourceImage);
         this.sampleMapRenderer.SampleMapCount = 1;
         this.sampleMapRenderer.SetSampleMap(0, this.sampleMapEffect);
         this.sampleMapRenderer.EdgeMode = SampleMapEdgeMode.Mirror;

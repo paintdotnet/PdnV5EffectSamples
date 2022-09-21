@@ -20,7 +20,6 @@ internal sealed class ShadowAroundSelectionGpuEffect
     public ShadowAroundSelectionGpuEffect()
         : base(
             "Shadow Around Selection (GPU Sample)",
-            null, // no icon
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -47,46 +46,36 @@ internal sealed class ShadowAroundSelectionGpuEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
+    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
     {
         this.insideSelection = newToken.GetProperty<BooleanProperty>(PropertyNames.InsideSelection).Value;
         this.outsideSelection = newToken.GetProperty<BooleanProperty>(PropertyNames.OutsideSelection).Value;
         this.blurRadius = newToken.GetProperty<Int32Property>(PropertyNames.BlurRadius).Value;
-        base.OnSetRenderInfo(newToken);
+        base.OnSetToken(newToken);
     }
 
     private bool insideSelection;
     private bool outsideSelection;
     private int blurRadius;
 
-    private IDeviceImage? selectionMaskImage;
-
-    protected override void OnInvalidateDeviceResources()
-    {
-        this.selectionMaskImage?.Dispose();
-        this.selectionMaskImage = null;
-
-        base.OnInvalidateDeviceResources();
-    }
-
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
         if (!this.insideSelection && !this.outsideSelection)
         {
-            return this.SourceImage;
+            return this.Environment.SourceImage;
         }
 
         // The output image will be composted from a few different images. The base is the source image (the
         // currently selected layer from the PDN image), and then the shadow is blended on top
         CompositeEffect outputImage = new CompositeEffect(deviceContext);
-        outputImage.Properties.Destination.Set(this.SourceImage);
+        outputImage.Properties.Destination.Set(this.Environment.SourceImage);
 
         // Retrieve the selection geometry and create a command list that draws a stroke outline of it
         // We can use the command list as an IDeviceImage that we plug into an effect (in this case, 
         // ShadowEffect)
         // The geometry object is cached by the effect infrastructure, so it is only (potentially) expensive
         // the first time it's retreived.
-        IGeometry selectionGeometry = this.EnvironmentParameters.Selection.GetGeometry(deviceContext.Factory);
+        IGeometry selectionGeometry = this.Environment.Selection.Geometry;
 
         ICommandList selectionOutline = deviceContext.CreateCommandList();
         using (selectionOutline.UseBeginDraw(deviceContext))
@@ -111,18 +100,8 @@ internal sealed class ShadowAroundSelectionGpuEffect
         }
         else
         {
-            // Only create this if needed, otherwise don't consume the CPU time and memory for the bitmap and image.
-            // This bitmap doesn't change, and can be a bit expensive (CPU and memory), so it's important to re-use
-            // it across renderings (that is, when the user changes values in the effect's UI). The mask bitmap is
-            // cached by Paint.NET, so it's only expensive the first time it's used to create a device image.
-            if (this.selectionMaskImage == null)
-            {
-                IBitmapSource<ColorAlpha8> selectionMaskBitmap = this.EnvironmentParameters.Selection.GetMaskBitmap();
-                this.selectionMaskImage = deviceContext.CreateImageFromBitmap(selectionMaskBitmap);
-            }
-
             CompositeEffect maskedShadow = new CompositeEffect(deviceContext);
-            maskedShadow.Properties.Destination.Set(this.selectionMaskImage);
+            maskedShadow.Properties.Destination.Set(this.Environment.Selection.MaskImage);
             maskedShadow.Properties.Sources.Add(shadowEffect);
             maskedShadow.Properties.Mode.SetValue(this.insideSelection ? CompositeMode.SourceIn : CompositeMode.SourceOut);
 

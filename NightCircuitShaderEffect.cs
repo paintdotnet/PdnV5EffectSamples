@@ -26,7 +26,6 @@ internal sealed partial class NightCircuitShaderEffect
     public NightCircuitShaderEffect()
         : base(
             "Night Circuit Shader (GPU Sample)",
-            null, // no icon
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -176,7 +175,7 @@ internal sealed partial class NightCircuitShaderEffect
         for (int i = 0; i < this.subPixelOffsets!.Length; ++i)
         {
             float iTime = time / 30.0f;
-            float2 iResolution = new float2(this.SourceSize.Width, this.SourceSize.Height);
+            float2 iResolution = new float2(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height);
 
             this.pixelShaderEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,

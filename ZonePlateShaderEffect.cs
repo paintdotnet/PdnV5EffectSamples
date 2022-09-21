@@ -20,7 +20,6 @@ internal sealed partial class ZonePlateShaderEffect
     public ZonePlateShaderEffect()
         : base(
             "Zone Plate Shader (GPU Sample)",
-            null, // no icon
             "GPU Samples",
             new GpuImageEffectOptions()
             {
@@ -45,14 +44,14 @@ internal sealed partial class ZonePlateShaderEffect
     private Guid shaderEffectID;
     private IDeviceEffect? shaderEffect;
 
-    protected override void OnSetRenderInfo(PropertyBasedEffectConfigToken newToken)
+    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
     {
         double scale = newToken.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
-        SizeInt32 sourceImageSize = this.SourceSize;
+        SizeInt32 sourceImageSize = this.Environment.CanvasSize;
         double diameter = (Math.Min(sourceImageSize.Width, sourceImageSize.Height) & ~1) * scale;
         this.shader = new Shader(new int2(sourceImageSize.Width, sourceImageSize.Height), (float)diameter);
        
-        base.OnSetRenderInfo(newToken);
+        base.OnSetToken(newToken);
     }
 
     protected override InspectTokenAction OnInspectTokenChanges(
