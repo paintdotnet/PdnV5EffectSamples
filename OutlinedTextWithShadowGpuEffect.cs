@@ -54,7 +54,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
 
         properties.Add(new StringProperty(PropertyNames.Text, "Outlined text, with a drop shadow, using Direct2D"));
 
-        IDirectWriteFactory dwFactory = this.Services.GetService<IDirectWriteFactory>();
+        IDirectWriteFactory dwFactory = this.Environment.DirectWriteFactory;
         using IGdiFontMap fontMap = dwFactory.GetGdiFontMap();
 
         string[] fontNames = fontMap.ToArray();
@@ -112,8 +112,8 @@ internal sealed class OutlinedTextWithShadowGpuEffect
     {
         SizeInt32 size = this.Environment.CanvasSize;
 
-        IDirect2DFactory d2dFactory = this.Services.GetService<IDirect2DFactory>();
-        IDirectWriteFactory dwFactory = this.Services.GetService<IDirectWriteFactory>();
+        IDirect2DFactory d2dFactory = this.Environment.Direct2DFactory;
+        IDirectWriteFactory dwFactory = this.Environment.DirectWriteFactory;
 
         ITextFormat textFormat = dwFactory.CreateTextFormat(
             this.fontName!,
