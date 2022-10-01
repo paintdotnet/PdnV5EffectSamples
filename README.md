@@ -9,5 +9,3 @@ Microsoft's has documentation for Direct2D effects, although some of it must be 
 * Effects main page https://docs.microsoft.com/en-us/windows/win32/direct2d/effects-overview
 * Built-in effects https://docs.microsoft.com/en-us/windows/win32/direct2d/built-in-effects
 * Effect precision and clamping https://microsoft.github.io/Win2D/WinUI2/html/EffectPrecision.htm
-
-Paint.NET v4.4 is still in early development, and does not yet have a public alpha release.
