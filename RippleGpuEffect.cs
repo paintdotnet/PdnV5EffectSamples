@@ -76,6 +76,11 @@ internal sealed partial class RippleGpuEffect
         controlInfo.SetPropertyControlValue(PropertyNames.Amplitude, ControlInfoPropertyNames.UseExponentialScale, true);
         controlInfo.SetPropertyControlValue(PropertyNames.Spread, ControlInfoPropertyNames.UseExponentialScale, true);
 
+        controlInfo.SetPropertyControlValue(
+            PropertyNames.Center,
+            ControlInfoPropertyNames.StaticImageUnderlay,
+            this.Environment.GetSourceBitmapBgra32());
+
         return controlInfo;
     }
 
