@@ -26,7 +26,7 @@ internal sealed partial class HueRotateEffect
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }

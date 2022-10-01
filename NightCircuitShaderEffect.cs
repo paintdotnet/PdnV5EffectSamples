@@ -29,7 +29,7 @@ internal sealed partial class NightCircuitShaderEffect
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }

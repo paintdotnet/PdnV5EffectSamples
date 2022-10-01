@@ -33,7 +33,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }
@@ -90,40 +90,28 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         return configUI;
     }
 
-    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
-    {
-        this.text = newToken.GetProperty<StringProperty>(PropertyNames.Text).Value;
-        this.fontName = (string)newToken.GetProperty<StaticListChoiceProperty>(PropertyNames.FontName).Value;
-        this.fontSize = newToken.GetProperty<Int32Property>(PropertyNames.FontSize).Value;
-        this.outlineThickness = newToken.GetProperty<Int32Property>(PropertyNames.OutlineThickness).Value;
-        this.rotationAngle = newToken.GetProperty<DoubleProperty>(PropertyNames.RotationAngle).Value;
-        this.shadowBlurRadius = newToken.GetProperty<Int32Property>(PropertyNames.ShadowBlurRadius).Value;
-        base.OnSetToken(newToken);
-    }
-
-    private string? text;
-    private string? fontName;
-    private int fontSize;
-    private int outlineThickness;
-    private double rotationAngle;
-    private int shadowBlurRadius;
-
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
         SizeInt32 size = this.Environment.CanvasSize;
+        string text = this.Token.GetProperty<StringProperty>(PropertyNames.Text).Value;
+        string fontName = (string)this.Token.GetProperty<StaticListChoiceProperty>(PropertyNames.FontName).Value;
+        int fontSize = this.Token.GetProperty<Int32Property>(PropertyNames.FontSize).Value;
+        int outlineThickness = this.Token.GetProperty<Int32Property>(PropertyNames.OutlineThickness).Value;
+        double rotationAngle = this.Token.GetProperty<DoubleProperty>(PropertyNames.RotationAngle).Value;
+        int shadowBlurRadius = this.Token.GetProperty<Int32Property>(PropertyNames.ShadowBlurRadius).Value;
 
         IDirect2DFactory d2dFactory = this.Environment.Direct2DFactory;
         IDirectWriteFactory dwFactory = this.Environment.DirectWriteFactory;
 
         ITextFormat textFormat = dwFactory.CreateTextFormat(
-            this.fontName!,
+            fontName,
             null, 
             FontWeight.Normal, 
             FontStyle.Normal, 
             FontStretch.Normal, 
-            this.fontSize);
+            fontSize);
 
-        ITextLayout textLayout = dwFactory.CreateTextLayout(this.text!, textFormat, size.Width, size.Height);
+        ITextLayout textLayout = dwFactory.CreateTextLayout(text, textFormat, size.Width, size.Height);
         textLayout.ParagraphAlignment = ParagraphAlignment.Center;
         textLayout.TextAlignment = TextAlignment.Center;
 
@@ -137,10 +125,10 @@ internal sealed class OutlinedTextWithShadowGpuEffect
             ISolidColorBrush whiteBrush = deviceContext.CreateSolidColorBrush(Colors.White);
 
             Point2Float centerPoint = new Point2Float(size.Width / 2.0f, size.Height / 2.0f);
-            using (deviceContext.UseTransform(Matrix3x2Float.RotationAt((float)-this.rotationAngle, centerPoint)))
+            using (deviceContext.UseTransform(Matrix3x2Float.RotationAt((float)-rotationAngle, centerPoint)))
             {
                 deviceContext.FillGeometry(textGeometry, whiteBrush);
-                deviceContext.DrawGeometry(textGeometry, blackBrush, this.outlineThickness);
+                deviceContext.DrawGeometry(textGeometry, blackBrush, outlineThickness);
             }
         }
         textImage.Close();
@@ -148,7 +136,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         ShadowEffect shadowEffect = new ShadowEffect(deviceContext);
         shadowEffect.Properties.Input.Set(textImage);
         shadowEffect.Properties.Optimization.SetValue(ShadowOptimization.Quality);
-        shadowEffect.Properties.BlurStandardDeviation.SetValue(StandardDeviation.FromRadius(this.shadowBlurRadius));
+        shadowEffect.Properties.BlurStandardDeviation.SetValue(StandardDeviation.FromRadius(shadowBlurRadius));
 
         CompositeEffect compositeEffect = new CompositeEffect(deviceContext);
         compositeEffect.Properties.Mode.SetValue(CompositeMode.SourceOver);

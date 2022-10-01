@@ -17,13 +17,16 @@ namespace PaintDotNet.Effects.Gpu.Samples;
 internal sealed partial class ZonePlateShaderEffect
     : PropertyBasedGpuImageEffect
 {
+    private Guid shaderEffectID;
+    private IDeviceEffect? shaderEffect;
+
     public ZonePlateShaderEffect()
         : base(
             "Zone Plate Shader (GPU Sample)",
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }
@@ -38,20 +41,6 @@ internal sealed partial class ZonePlateShaderEffect
         List<Property> properties = new List<Property>();
         properties.Add(new DoubleProperty(PropertyNames.Scale, 1.0, 0.0, 2.0));
         return new PropertyCollection(properties);
-    }
-
-    private Shader shader;
-    private Guid shaderEffectID;
-    private IDeviceEffect? shaderEffect;
-
-    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
-    {
-        double scale = newToken.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
-        SizeInt32 sourceImageSize = this.Environment.CanvasSize;
-        double diameter = (Math.Min(sourceImageSize.Width, sourceImageSize.Height) & ~1) * scale;
-        this.shader = new Shader(new int2(sourceImageSize.Width, sourceImageSize.Height), (float)diameter);
-       
-        base.OnSetToken(newToken);
     }
 
     protected override InspectTokenAction OnInspectTokenChanges(
@@ -77,10 +66,15 @@ internal sealed partial class ZonePlateShaderEffect
 
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
     {
+        double scale = this.Token.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
+        SizeInt32 sourceImageSize = this.Environment.CanvasSize;
+        double diameter = (Math.Min(sourceImageSize.Width, sourceImageSize.Height) & ~1) * scale;
+        Shader shader = new Shader(new int2(sourceImageSize.Width, sourceImageSize.Height), (float)diameter);
+
         this.shaderEffect!.SetValue(
             0, 
             PropertyType.Blob,
-            D2D1PixelShader.GetConstantBuffer(this.shader));
+            D2D1PixelShader.GetConstantBuffer(shader));
 
         base.OnUpdateOutput(deviceContext);
     }

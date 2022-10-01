@@ -22,7 +22,7 @@ internal sealed class ChannelBlurEffect
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }

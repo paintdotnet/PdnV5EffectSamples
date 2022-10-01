@@ -18,7 +18,7 @@ internal sealed class DropShadowGpuEffect
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }
@@ -37,24 +37,17 @@ internal sealed class DropShadowGpuEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
-    {
-        this.blurRadius = newToken.GetProperty<Int32Property>(PropertyNames.BlurRadius).Value;
-        base.OnSetToken(newToken);
-    }
-
-    private int blurRadius;
-
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
         // Set up a simple transform graph.
         // SourceImage is plugged into ShadowEffect, which will rendered the shadow.
         // Then, CompositeEffect, which is used as the output, is used to blend SourceImage on top of ShadowEffect.
+        int blurRadius = this.Token.GetProperty<Int32Property>(PropertyNames.BlurRadius).Value;
 
         ShadowEffect shadowEffect = new ShadowEffect(deviceContext);
         shadowEffect.Properties.Input.Set(this.Environment.SourceImage);
         shadowEffect.Properties.Optimization.SetValue(ShadowOptimization.Quality);
-        shadowEffect.Properties.BlurStandardDeviation.SetValue(StandardDeviation.FromRadius(this.blurRadius));
+        shadowEffect.Properties.BlurStandardDeviation.SetValue(StandardDeviation.FromRadius(blurRadius));
         
         CompositeEffect compositeEffect = new CompositeEffect(deviceContext);
         compositeEffect.Properties.Destination.Set(shadowEffect);

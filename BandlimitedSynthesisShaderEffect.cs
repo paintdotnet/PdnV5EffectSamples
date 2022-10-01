@@ -20,7 +20,7 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }
@@ -37,11 +37,6 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
         properties.Add(new DoubleProperty(PropertyNames.Time, 0, 0, 100));
         properties.Add(new UriProperty(PropertyNames.Link, new Uri("https://www.shadertoy.com/view/WtScDt")));
         return new PropertyCollection(properties);
-    }
-
-    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
-    {
-        base.OnSetToken(newToken);
     }
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)

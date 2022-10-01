@@ -23,7 +23,7 @@ internal sealed class ShadowAroundSelectionGpuEffect
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable | EffectFlags.DisableSelectionClipping
+                IsConfigurable = true
             })
     {
     }
@@ -46,21 +46,19 @@ internal sealed class ShadowAroundSelectionGpuEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
+    protected override void OnInitializeRenderInfo(GpuImageEffectRenderInfo gpuRenderInfo)
     {
-        this.insideSelection = newToken.GetProperty<BooleanProperty>(PropertyNames.InsideSelection).Value;
-        this.outsideSelection = newToken.GetProperty<BooleanProperty>(PropertyNames.OutsideSelection).Value;
-        this.blurRadius = newToken.GetProperty<Int32Property>(PropertyNames.BlurRadius).Value;
-        base.OnSetToken(newToken);
+        gpuRenderInfo.RenderingFlags |= GpuEffectRenderingFlags.DisableSelectionClipping;
+        base.OnInitializeRenderInfo(gpuRenderInfo);
     }
-
-    private bool insideSelection;
-    private bool outsideSelection;
-    private int blurRadius;
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        if (!this.insideSelection && !this.outsideSelection)
+        bool insideSelection = this.Token.GetProperty<BooleanProperty>(PropertyNames.InsideSelection).Value;
+        bool outsideSelection = this.Token.GetProperty<BooleanProperty>(PropertyNames.OutsideSelection).Value;
+        int blurRadius = this.Token.GetProperty<Int32Property>(PropertyNames.BlurRadius).Value;
+        
+        if (!insideSelection && !outsideSelection)
         {
             return this.Environment.SourceImage;
         }
@@ -84,16 +82,16 @@ internal sealed class ShadowAroundSelectionGpuEffect
             // the device context's current "target" that receives the drawing commands.
 
             ISolidColorBrush brush = deviceContext.CreateSolidColorBrush(Colors.Black);
-            deviceContext.DrawGeometry(selectionGeometry, brush, this.blurRadius / 2.0f);
+            deviceContext.DrawGeometry(selectionGeometry, brush, blurRadius / 2.0f);
         }
 
         // Create a shadow effect that will blur the image of the stroked geometry outline
         ShadowEffect shadowEffect = new ShadowEffect(deviceContext);
         shadowEffect.Properties.Input.Set(selectionOutline);
-        shadowEffect.Properties.BlurStandardDeviation.SetValue(StandardDeviation.FromRadius(this.blurRadius));
+        shadowEffect.Properties.BlurStandardDeviation.SetValue(StandardDeviation.FromRadius(blurRadius));
         shadowEffect.Properties.Optimization.SetValue(ShadowOptimization.Quality);
 
-        if (this.insideSelection && this.outsideSelection)
+        if (insideSelection && outsideSelection)
         {
             outputImage.Properties.Sources.Add(shadowEffect);
             outputImage.Properties.Mode.SetValue(CompositeMode.SourceOver);
@@ -103,7 +101,7 @@ internal sealed class ShadowAroundSelectionGpuEffect
             CompositeEffect maskedShadow = new CompositeEffect(deviceContext);
             maskedShadow.Properties.Destination.Set(this.Environment.Selection.MaskImage);
             maskedShadow.Properties.Sources.Add(shadowEffect);
-            maskedShadow.Properties.Mode.SetValue(this.insideSelection ? CompositeMode.SourceIn : CompositeMode.SourceOut);
+            maskedShadow.Properties.Mode.SetValue(insideSelection ? CompositeMode.SourceIn : CompositeMode.SourceOut);
 
             outputImage.Properties.Sources.Add(maskedShadow);
         }

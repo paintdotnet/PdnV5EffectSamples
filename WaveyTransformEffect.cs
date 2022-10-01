@@ -31,7 +31,7 @@ internal sealed partial class WaveyTransformEffect
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }

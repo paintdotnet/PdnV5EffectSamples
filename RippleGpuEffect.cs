@@ -28,13 +28,16 @@ using IDeviceContext = PaintDotNet.Direct2D1.IDeviceContext;
 internal sealed partial class RippleGpuEffect
     : PropertyBasedGpuImageEffect
 {
+    private Guid sampleMapEffectID;
+    private SampleMapRenderer? sampleMapRenderer;
+
     public RippleGpuEffect()
         : base(
             "Ripple (GPU Sample)",
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }
@@ -76,39 +79,6 @@ internal sealed partial class RippleGpuEffect
         return controlInfo;
     }
 
-    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
-    {
-        double width = this.Environment.CanvasSize.Width;
-        double height = this.Environment.CanvasSize.Height;
-
-        double size = newToken.GetProperty<DoubleProperty>(PropertyNames.Size).Value;
-        this.sizePx = size * (Math.Max(width, height) / 2.0);
-
-        this.frequency = newToken.GetProperty<DoubleProperty>(PropertyNames.Frequency).Value;
-        this.phase = newToken.GetProperty<DoubleProperty>(PropertyNames.Phase).Value;
-        this.amplitude = newToken.GetProperty<DoubleProperty>(PropertyNames.Amplitude).Value;
-        this.spread = newToken.GetProperty<DoubleProperty>(PropertyNames.Spread).Value;
-
-        Vector2Double center = newToken.GetProperty<DoubleVectorProperty>(PropertyNames.Center).Value;
-        this.centerPoint = new Point2Double(
-            (width + (center.X * width)) / 2.0,
-            (height + (center.Y * height)) / 2.0);
-
-        this.quality = newToken.GetProperty<Int32Property>(PropertyNames.Quality).Value;
-
-        base.OnSetToken(newToken);
-    }
-
-    private Guid sampleMapEffectID;
-    private double sizePx;
-    private double frequency;
-    private double phase;
-    private double amplitude;
-    private double spread;
-    private int quality;
-    private Point2Double centerPoint;
-    private SampleMapRenderer? sampleMapRenderer;
-
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
     {
         // Register a D2D1PixelShaderEffect for the shader. The PixelShaderEffect must be registered once per shader.
@@ -120,6 +90,24 @@ internal sealed partial class RippleGpuEffect
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
+        double width = this.Environment.CanvasSize.Width;
+        double height = this.Environment.CanvasSize.Height;
+
+        double size = this.Token.GetProperty<DoubleProperty>(PropertyNames.Size).Value;
+        double sizePx = size * (Math.Max(width, height) / 2.0);
+
+        double frequency = this.Token.GetProperty<DoubleProperty>(PropertyNames.Frequency).Value;
+        double phase = this.Token.GetProperty<DoubleProperty>(PropertyNames.Phase).Value;
+        double amplitude = this.Token.GetProperty<DoubleProperty>(PropertyNames.Amplitude).Value;
+        double spread = this.Token.GetProperty<DoubleProperty>(PropertyNames.Spread).Value;
+
+        Vector2Double center = this.Token.GetProperty<DoubleVectorProperty>(PropertyNames.Center).Value;
+        Point2Double centerPoint = new Point2Double(
+            (width + (center.X * width)) / 2.0,
+            (height + (center.Y * height)) / 2.0);
+
+        int quality = this.Token.GetProperty<Int32Property>(PropertyNames.Quality).Value;
+
         // To implement multisampling, the ripple effect is run multiple times at various sampling offsets,
         // which are then blended together by the SampleMapRenderer to form the final high-quality output.
         // The # of samples is equal to the square of the quality value, so a quality value of [1,2,3,4,...,8]
@@ -129,7 +117,7 @@ internal sealed partial class RippleGpuEffect
         this.sampleMapRenderer.SetInput(this.Environment.SourceImage);
         this.sampleMapRenderer.EdgeMode = SampleMapEdgeMode.Clamp;
 
-        Vector2Float[] sampleOffsets = EffectHelpers.GetRgssOffsets(this.quality);
+        Vector2Float[] sampleOffsets = EffectHelpers.GetRgssOffsets(quality);
         this.sampleMapRenderer.SampleMapCount = sampleOffsets.Length;
 
         for (int i = 0; i < sampleOffsets.Length; ++i)
@@ -149,14 +137,14 @@ internal sealed partial class RippleGpuEffect
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
                 PropertyType.Blob,
                 D2D1PixelShader.GetConstantBuffer(new SampleMapShader(
-                    (float)this.sizePx,
-                    (float)this.frequency,
-                    (float)this.phase,
-                    (float)this.amplitude,
-                    (float)this.spread,
+                    (float)sizePx,
+                    (float)frequency,
+                    (float)phase,
+                    (float)amplitude,
+                    (float)spread,
                     new float2(
-                        (float)this.centerPoint.X,
-                        (float)this.centerPoint.Y))));
+                        (float)centerPoint.X,
+                        (float)centerPoint.Y))));
 
             this.sampleMapRenderer.SetSampleMap(i, rippleSampleMap);
         }

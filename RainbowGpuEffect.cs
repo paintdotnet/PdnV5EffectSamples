@@ -20,7 +20,7 @@ internal sealed class RainbowGpuEffect
             "GPU Samples",
             new GpuDrawingEffectOptions()
             {
-                Flags = EffectFlags.Configurable
+                IsConfigurable = true
             })
     {
     }
@@ -39,23 +39,16 @@ internal sealed class RainbowGpuEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnSetToken(PropertyBasedEffectConfigToken newToken)
-    {
-        this.hueOffset = newToken.GetProperty<Int32Property>(PropertyNames.HueOffset).Value;
-        base.OnSetToken(newToken);
-    }
-
-    private int hueOffset;
-
     protected override void OnDraw(IDeviceContext dc)
     {
         SizeInt32 size = this.Environment.CanvasSize;
+        int hueOffset = this.Token.GetProperty<Int32Property>(PropertyNames.HueOffset).Value;
 
         // D2D1_GRADIENT_STOP: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/ns-d2d1-d2d1_gradient_stop
         GradientStop[] gradientStops = new GradientStop[361];
         for (int i = 0; i < gradientStops.Length; ++i)
         {
-            int hue = ((i + 360 - this.hueOffset) % 360);
+            int hue = ((i + 360 - hueOffset) % 360);
 
             // ColorHsv96Float is a Paint.NET primitive. It can be converted to an ColorRgb96Float
             // with the ToRgb() method, and then cast to ColorRgba128Float.

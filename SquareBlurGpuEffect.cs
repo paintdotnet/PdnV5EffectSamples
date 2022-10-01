@@ -25,7 +25,7 @@ internal sealed partial class SquareBlurGpuEffect
             "GPU Samples",
             new GpuImageEffectOptions()
             {
-                Flags = EffectFlags.Configurable,
+                IsConfigurable = true
             })
     {
     }
