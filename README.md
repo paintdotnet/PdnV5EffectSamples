@@ -1,9 +1,16 @@
-# PdnGpuEffectSamples
-Sample effect plugins that show how to use the new Direct2D/GPU effects system available in Paint.NET v5.0
+# PdnV5EffectSamples
+Sample effect plugins that show how to use the new effect systems available in Paint.NET v5.0.
 
-In Paint.NET v5.0, effect plugins will now have access to Direct2D for rendering, which makes it possible to use the GPU. Direct2D has a rich effects system of its own. Effects can be combined together in a transform graph, either in a simple linear fashion (A's output is B's input, and then B's input is C's output, etc), or in a more complicated manner (A's output is B and C's input, then D's inputs are A's output and C's output, etc.).
+The new effect system is split into two parts: `BitmapEffect`, which run on the CPU, and `GpuEffect` which use Direct2D for rendering on the GPU.
 
-Custom Direct2D effects can be implemented, which can have their own internal transform graph comprised of other effects, or of lower level "transforms". Transforms have access to lower-level primitives, and can utilize HLSL pixel shaders.
+`BitmapEffect` is the replacement for the "classic" `Effect` base class. It's very similar but but uses virtualized storage for inputs and outputs, permits access to all layers (and a composite of the whole image aka 'Document'), supports output pixel formats other than BGRA32, and has a more modern API (the "classic" effect plugin system dates back to 2004!).
+
+`GpuEffect`, along with `GpuImageEffect` and `GpuDrawingEffect`, use Direct2D for rendering on the GPU. It has the same new features as `BitmapEffect`, except each input (layers, document, and selection mask) are also provided in a GPU-compatible format (`IDeviceImage` instead of `IBitmapSource`).
+
+- `GpuImageEffect` is the most common base class, giving direct access to Direct2D's imaging and effects system. Here you can create an effect graph comprised of [built-in Direct2D effects](https://learn.microsoft.com/en-us/windows/win32/direct2d/built-in-effects), any of the built-in Paint.NET GPU effects, and custom pixel shaders implemented using [ComputeSharp.D2D1](https://github.com/Sergio0694/ComputeSharp).
+- `GpuDrawingEffect` provides an `OnDraw(IDeviceContext)` method for you to implement imperative drawing with methods like `DrawRectangle`, `FillGeometry`, etc.
+  - This is implemented using `GpuImageEffect`: drawing commands are buffered into a Direct2D command list, which itself is an `IDeviceImage`.
+- `GpuEffect` is the lowest-level base class, allowing you to specify the Direct2D drawing commands separately for each rendered tile. This can be used to optimize performance in extreme scenarios where the number of drawing commands is high, and Direct2D's built-in clipping performance is not sufficient. However, this is rarely the case, and `GpuDrawingEffect` should be preferred for when you need to perform imperative drawing.
 
 Microsoft's has documentation for Direct2D effects, although some of it must be gleamed from their open-source Win2D project.
 * Effects main page https://docs.microsoft.com/en-us/windows/win32/direct2d/effects-overview
