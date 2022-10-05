@@ -70,6 +70,12 @@ internal sealed class SquareBlurBitmapEffect
         using IBitmap<ColorBgra32> sourceTile = this.sourceBitmap!
             .CreateClipper(sourceRect, BitmapExtendMode.Clamp)
             .ToBitmap();
+
+        if (this.IsCancelRequested)
+        {
+            return;
+        }
+
         using IBitmapLock<ColorBgra32> sourceTileLock = sourceTile.Lock(BitmapLockOptions.Read);
 
         // Get an offset view of the source so that x,y values are aligned with outputRegion
@@ -79,6 +85,11 @@ internal sealed class SquareBlurBitmapEffect
 
         for (int outputDY = 0; outputDY < outputRegion.Height; ++outputDY)
         {
+            if (this.IsCancelRequested)
+            {
+                return;
+            }
+
             for (int outputDX = 0; outputDX < outputRegion.Width; ++outputDX)
             {
                 Vector4Float samples = default;
