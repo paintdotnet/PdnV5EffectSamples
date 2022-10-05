@@ -21,9 +21,6 @@ using System.Collections.Generic;
 
 namespace PaintDotNet.Effects.Samples.Gpu;
 
-// Disambiguate between System.Drawing.IDeviceContext and PaintDotNet.Direct2D1.IDeviceContext
-using IDeviceContext = PaintDotNet.Direct2D1.IDeviceContext;
-
 internal sealed partial class RippleGpuEffect
     : PropertyBasedGpuImageEffect
 {

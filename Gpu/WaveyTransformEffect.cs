@@ -20,8 +20,6 @@ using System.Collections.Generic;
 
 namespace PaintDotNet.Effects.Samples.Gpu;
 
-using IDeviceContext = PaintDotNet.Direct2D1.IDeviceContext;
-
 internal sealed partial class WaveyTransformEffect
     : PropertyBasedGpuImageEffect
 {
