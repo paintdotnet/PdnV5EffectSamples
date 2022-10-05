@@ -30,7 +30,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
     public OutlinedTextWithShadowGpuEffect()
         : base(
             "Outlined Text with Shadow (GPU Sample)",
-            "GPU Samples",
+            "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {
                 IsConfigurable = true

@@ -16,7 +16,7 @@ internal sealed class DropShadowGpuEffect
     public DropShadowGpuEffect()
         : base(
             "Drop Shadow (GPU Sample)",
-            "GPU Samples",
+            "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {
                 IsConfigurable = true

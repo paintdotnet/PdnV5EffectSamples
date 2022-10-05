@@ -18,7 +18,7 @@ internal sealed class GaussianBokehGpuEffect
     public GaussianBokehGpuEffect()
         : base(
             "Gaussian Bokeh (GPU Sample)",
-            "GPU Samples",
+            "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {
                 IsConfigurable = true

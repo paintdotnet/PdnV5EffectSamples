@@ -33,7 +33,7 @@ internal sealed partial class RippleGpuEffect
     public RippleGpuEffect()
         : base(
             "Ripple (GPU Sample)",
-            "GPU Samples",
+            "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {
                 IsConfigurable = true

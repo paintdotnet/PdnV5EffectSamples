@@ -25,7 +25,7 @@ internal sealed partial class HueRotateEffectAdvanced
     public HueRotateEffectAdvanced()
         : base(
             "Hue Rotate (GPU Sample, Advanced Implementation)",
-            "GPU Samples",
+            "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {
                 IsConfigurable = true

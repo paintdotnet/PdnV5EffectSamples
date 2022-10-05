@@ -17,7 +17,7 @@ internal sealed class RainbowGpuEffect
     public RainbowGpuEffect()
         : base(
             "Rainbow (GPU Sample)",
-            "GPU Samples",
+            "PDN v5 Samples (GPU)",
             new GpuDrawingEffectOptions()
             {
                 IsConfigurable = true

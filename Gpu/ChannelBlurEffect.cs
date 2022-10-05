@@ -17,7 +17,7 @@ internal sealed class ChannelBlurEffect
     public ChannelBlurEffect()
         : base(
             "Channel Blur (GPU Sample)",
-            "GPU Samples",
+            "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {
                 IsConfigurable = true

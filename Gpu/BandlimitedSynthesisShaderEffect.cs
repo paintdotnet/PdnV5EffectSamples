@@ -18,7 +18,7 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
     public BandlimitedSynthesisShaderEffect()
         : base(
             "Bandlimited Synthesis Shader (GPU Samples)",
-            "GPU Samples",
+            "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {
                 IsConfigurable = true
