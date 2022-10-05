@@ -18,7 +18,7 @@ using System.Collections.Generic;
 // Using SampleMapRenderer is recommended, versus rolling your own, as it is complicated to get it working
 // correctly with large images due to Direct2D's effects rendering architecture.
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 using IDeviceContext = PaintDotNet.Direct2D1.IDeviceContext;
 

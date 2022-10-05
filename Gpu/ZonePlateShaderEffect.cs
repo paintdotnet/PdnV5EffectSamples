@@ -2,6 +2,7 @@
 using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
 using PaintDotNet.Direct2D1;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.Imaging;
 using PaintDotNet.PropertySystem;
 using PaintDotNet.Rendering;
@@ -12,7 +13,7 @@ using System.Collections.Generic;
 // https://en.wikipedia.org/wiki/Zone_plate
 // Code based on: https://github.com/saucecontrol/PhotoSauce/blob/v0.13.0/src/MagicScaler/Magic/ZonePlatePixelSource.cs
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 internal sealed partial class ZonePlateShaderEffect
     : PropertyBasedGpuImageEffect

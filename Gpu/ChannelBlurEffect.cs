@@ -2,14 +2,12 @@
 
 using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.PropertySystem;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 // This sample shows how to combine GaussianBlurEffect and InputSwizzleEffect to create a blur the only affects the requested channels
 

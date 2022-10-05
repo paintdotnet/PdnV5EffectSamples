@@ -1,7 +1,7 @@
 ﻿using PaintDotNet.Rendering;
 using System;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 internal class EffectHelpers
 {

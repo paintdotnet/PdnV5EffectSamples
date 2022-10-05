@@ -5,6 +5,7 @@ using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
 using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
 using PaintDotNet.Rendering;
@@ -18,7 +19,7 @@ using System.Threading.Tasks;
 // This sample also shows how to choose at runtime between running a shader in either IEEE strict or relaxed mode.
 // Originally written by "gaz": https://www.shadertoy.com/view/tdyBR1
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 internal sealed partial class NightCircuitShaderEffect
     : PropertyBasedGpuImageEffect

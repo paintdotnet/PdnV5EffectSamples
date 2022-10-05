@@ -3,6 +3,7 @@ using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
 using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
 using System;
@@ -12,7 +13,7 @@ using System.Collections.Generic;
 // The random number generator is also used in Paint.NET, and is based on this blog post by Nathan Reed:
 //     https://www.reedbeta.com/blog/hash-functions-for-gpu-rendering/
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 internal sealed partial class RandomNoiseEffect
     : PropertyBasedGpuImageEffect

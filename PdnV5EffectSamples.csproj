@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
-    <RootNamespace>PaintDotNet.Effects.Gpu.Samples</RootNamespace>
+    <RootNamespace>PaintDotNet.Effects.Samples</RootNamespace>
     <Nullable>enable</Nullable>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <UseWindowsForms>true</UseWindowsForms>

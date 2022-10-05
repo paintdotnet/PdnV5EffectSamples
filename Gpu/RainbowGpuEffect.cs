@@ -8,7 +8,7 @@ using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 // This is a very simple effect that just draws a rainbow using a linear gradient brush
 internal sealed class RainbowGpuEffect

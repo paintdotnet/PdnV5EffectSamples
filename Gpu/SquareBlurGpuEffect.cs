@@ -2,13 +2,14 @@
 using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
 using PaintDotNet.Direct2D1;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.PropertySystem;
 using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 // This sample shows how to use a pixel shader with a "complex" input.
 // Complex inputs allow reading from pixels that are not at the same position as the 

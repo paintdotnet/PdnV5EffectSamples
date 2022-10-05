@@ -1,14 +1,12 @@
 ﻿using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 // This sample uses both the Gaussian Blur and PDN's Bokeh blur effects and composes them together.
 // Using the CrossFade slider you can have all Gaussian, a mixture, or all Bokeh.

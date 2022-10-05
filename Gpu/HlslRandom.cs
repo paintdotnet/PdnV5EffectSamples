@@ -1,7 +1,7 @@
 ﻿using ComputeSharp;
 using System;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 internal static class HlslRandom
 {

@@ -9,7 +9,7 @@ using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 // A simple effect that renders a drop shadow inside the active selection using the Direct2D ShadowEffect.
 // This does not require there to be any transparency. This sample shows how to retrieve the active selection

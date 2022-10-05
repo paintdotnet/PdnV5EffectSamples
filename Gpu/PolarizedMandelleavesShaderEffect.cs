@@ -6,13 +6,14 @@ using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
 using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
 using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 // This is a port of a colorful fractal shader from ShaderToy, combined with a Polar Inversion sample map
 // shader that transforms the scene positions before feeding them to the Mandelleaves shader. This results

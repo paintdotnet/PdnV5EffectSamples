@@ -1,10 +1,11 @@
 ﻿using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.PropertySystem;
 using System;
 using System.Collections.Generic;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 // A simple effect that renders a drop shadow using the Direct2D ShadowEffect.
 // This effect requires that the "object" have a transparent background. It will not

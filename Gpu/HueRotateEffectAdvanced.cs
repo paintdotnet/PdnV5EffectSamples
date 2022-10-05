@@ -3,12 +3,13 @@ using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
 using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.IndirectUI;
 using PaintDotNet.PropertySystem;
 using System;
 using System.Collections.Generic;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 // This is the same as HueRotateEffect, except that it does implement OnSetDeviceContext(),
 // OnInvalidateDeviceResources(), OnInspectTokenChanges(), and OnUpdateOutput(). Thus, this sample

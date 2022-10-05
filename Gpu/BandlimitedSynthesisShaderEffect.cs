@@ -2,11 +2,12 @@
 using ComputeSharp.D2D1;
 using ComputeSharp.D2D1.Interop;
 using PaintDotNet.Direct2D1;
+using PaintDotNet.Effects.Gpu;
 using PaintDotNet.PropertySystem;
 using System;
 using System.Collections.Generic;
 
-namespace PaintDotNet.Effects.Gpu.Samples;
+namespace PaintDotNet.Effects.Samples.Gpu;
 
 internal sealed partial class BandlimitedSynthesisShaderEffect
     : PropertyBasedGpuImageEffect
