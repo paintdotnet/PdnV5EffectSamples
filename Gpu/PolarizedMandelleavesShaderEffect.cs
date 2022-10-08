@@ -177,7 +177,6 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
 
             this.polarInversionEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
-                PropertyType.Blob,
                 D2D1PixelShader.GetConstantBuffer(new PolarInversionShader(
                     new float2((float)centerOffset.X, (float)centerOffset.Y),
                     (float)radius2,
@@ -185,13 +184,11 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
 
             this.sampleMapMirrorEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
-                PropertyType.Blob,
                 D2D1PixelShader.GetConstantBuffer(new SampleMapMirrorShader(
                     new float2(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height))));
 
             this.mandelleavesShaderEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
-                PropertyType.Blob,
                 D2D1PixelShader.GetConstantBuffer(new MandelleavesShader(
                     new float2(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height),
                     0,

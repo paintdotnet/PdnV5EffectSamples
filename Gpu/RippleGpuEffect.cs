@@ -136,7 +136,6 @@ internal sealed partial class RippleGpuEffect
             rippleSampleMap.SetInput(0, scenePosRgssSampleMap);
             rippleSampleMap.SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
-                PropertyType.Blob,
                 D2D1PixelShader.GetConstantBuffer(new SampleMapShader(
                     (float)sizePx,
                     (float)frequency,

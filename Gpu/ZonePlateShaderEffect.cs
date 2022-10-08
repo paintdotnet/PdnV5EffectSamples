@@ -73,8 +73,7 @@ internal sealed partial class ZonePlateShaderEffect
         Shader shader = new Shader(new int2(sourceImageSize.Width, sourceImageSize.Height), (float)diameter);
 
         this.shaderEffect!.SetValue(
-            0, 
-            PropertyType.Blob,
+            D2D1PixelShaderEffectProperty.ConstantBuffer,
             D2D1PixelShader.GetConstantBuffer(shader));
 
         base.OnUpdateOutput(deviceContext);

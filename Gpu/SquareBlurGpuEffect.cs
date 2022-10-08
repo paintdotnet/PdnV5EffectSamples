@@ -60,11 +60,16 @@ internal sealed partial class SquareBlurGpuEffect
 
         shaderEffect.SetInput(0, this.Environment.SourceImage);
 
+        // Note that it's very important to use D2D1PixelShader.GetConstantBuffer() when setting the ConstantBuffer.
+        // SetValue() can be called with the Shader directly, which will use the overload that takes an `in T where T : unmanaged`,
+        // but there's no guarantee that the layout of the pixel shader's constant buffer will match the layout of the C# struct.
+        // Direct3D/HLSL and C# do not have the same rules for packing and alignment.
         shaderEffect.SetValue(
             D2D1PixelShaderEffectProperty.ConstantBuffer,
-            new SquareBlurShader(
-                radius,
-                (float)(1.0 / (radius * radius))));
+            D2D1PixelShader.GetConstantBuffer(
+                new SquareBlurShader(
+                    radius,
+                    (float)(1.0 / (radius * radius)))));
 
         return shaderEffect;
     }

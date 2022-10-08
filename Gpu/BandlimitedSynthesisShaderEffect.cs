@@ -57,8 +57,7 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
     {
         this.shaderEffect!.SetValue(
-            0,
-            PropertyType.Blob,
+            D2D1PixelShaderEffectProperty.ConstantBuffer,
             D2D1PixelShader.GetConstantBuffer(new Shader(
                 new float3(
                     this.Environment.CanvasSize.Width,

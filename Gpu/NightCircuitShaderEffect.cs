@@ -180,7 +180,6 @@ internal sealed partial class NightCircuitShaderEffect
 
             this.pixelShaderEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
-                PropertyType.Blob,
                 ieeeStrict
                     ? D2D1PixelShader.GetConstantBuffer(new IeeeStrictShader(iTime, iResolution))
                     : D2D1PixelShader.GetConstantBuffer(new IeeeRelaxedShader(iTime, iResolution)));

@@ -170,7 +170,7 @@ internal sealed partial class WaveyTransformEffect
         {
             Vector2Float subPxOffset = EffectHelpers.GetRgssOffset(quality, i);
             this.subPxScenePositionEffects![i].Properties.Value2.SetValue(new Vector4Float(subPxOffset, 0, 0));
-            this.sampleMapEffects![i]!.SetValue(0, PropertyType.Blob, sampleMapConstantBuffer);
+            this.sampleMapEffects![i]!.SetValue(D2D1PixelShaderEffectProperty.ConstantBuffer, sampleMapConstantBuffer);
         }
 
         base.OnUpdateOutput(deviceContext);

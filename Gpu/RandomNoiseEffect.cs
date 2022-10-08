@@ -141,8 +141,7 @@ internal sealed partial class RandomNoiseEffect
         uint instanceSeed = (uint)Random.Shared.NextInt64(0, (long)uint.MaxValue + 1);
         Shader shader = new Shader(instanceSeed);
         this.shaderEffect!.SetValue(
-            0,
-            PropertyType.Blob,
+            D2D1PixelShaderEffectProperty.ConstantBuffer,
             D2D1PixelShader.GetConstantBuffer(shader));
 
         ColorMode colorMode = (ColorMode)this.Token.GetProperty(PropertyNames.ColorMode).Value;
