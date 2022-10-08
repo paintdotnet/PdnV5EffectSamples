@@ -58,7 +58,7 @@ internal sealed class SquareBlurBitmapEffect
         int radius = this.radius;
         if (radius == 0)
         {
-            this.sourceBitmap!.CopyPixels(outputLock, output.OutputRect.Location);
+            this.sourceBitmap!.CopyPixels(outputLock, output.Bounds.Location);
             return;
         }
 
@@ -66,7 +66,7 @@ internal sealed class SquareBlurBitmapEffect
 
         // Retrieve the region we need from the source bitmap. We clip the bitmap with the Clamp extend mode
         // so that we can access pixels "outside" the source without having a lot of messy bounds checking code
-        RectInt32 sourceRect = RectInt32.Inflate(output.OutputRect, this.radius, this.radius);
+        RectInt32 sourceRect = RectInt32.Inflate(output.Bounds, this.radius, this.radius);
         using IBitmap<ColorBgra32> sourceTile = this.sourceBitmap!
             .CreateClipper(sourceRect, BitmapExtendMode.Clamp)
             .ToBitmap();
