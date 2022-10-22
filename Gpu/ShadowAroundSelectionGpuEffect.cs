@@ -48,7 +48,7 @@ internal sealed class ShadowAroundSelectionGpuEffect
 
     protected override void OnInitializeRenderInfo(IGpuImageEffectRenderInfo gpuRenderInfo)
     {
-        gpuRenderInfo.RenderingFlags |= GpuEffectRenderingFlags.DisableSelectionClipping;
+        gpuRenderInfo.Flags |= GpuEffectRenderingFlags.DisableSelectionClipping;
         base.OnInitializeRenderInfo(gpuRenderInfo);
     }
 
