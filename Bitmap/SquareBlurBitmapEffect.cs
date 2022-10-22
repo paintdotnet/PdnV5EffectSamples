@@ -38,7 +38,7 @@ internal sealed class SquareBlurBitmapEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnInitializeRenderInfo(BitmapEffectRenderInfo renderInfo)
+    protected override void OnInitializeRenderInfo(IBitmapEffectRenderInfo renderInfo)
     {
         this.sourceBitmap = this.Environment.GetSourceBitmapBgra32();
         base.OnInitializeRenderInfo(renderInfo);

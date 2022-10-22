@@ -46,7 +46,7 @@ internal sealed class ShadowAroundSelectionGpuEffect
         return new PropertyCollection(properties);
     }
 
-    protected override void OnInitializeRenderInfo(GpuImageEffectRenderInfo gpuRenderInfo)
+    protected override void OnInitializeRenderInfo(IGpuImageEffectRenderInfo gpuRenderInfo)
     {
         gpuRenderInfo.RenderingFlags |= GpuEffectRenderingFlags.DisableSelectionClipping;
         base.OnInitializeRenderInfo(gpuRenderInfo);
