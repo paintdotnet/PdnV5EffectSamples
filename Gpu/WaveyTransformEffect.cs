@@ -122,19 +122,15 @@ internal sealed partial class WaveyTransformEffect
         // Using an update transaction is optional, but helps performance since updating properties on the
         // SampleMapRenderer can be expensive. Using a transaction allows it to defer its internal updates
         // until the end of the transaction.
-        using (this.sampleMapRenderer.UseUpdateTransaction())
+        this.sampleMapRenderer.Properties.Input.Set(this.Environment.SourceImage);
+        this.sampleMapRenderer.Properties.SampleMaps.SetCount(sampleCount);
+
+        for (int i = 0; i < sampleCount; ++i)
         {
-            this.sampleMapRenderer.SetInput(this.Environment.SourceImage);
-            this.sampleMapRenderer.InputRect = new RectInt32(Point2Int32.Zero, this.Environment.CanvasSize);
-            this.sampleMapRenderer.SampleMapCount = sampleCount;
-
-            for (int i = 0; i < sampleCount; ++i)
-            {
-                this.sampleMapRenderer.SetSampleMap(i, this.sampleMapEffects[i]);
-            }
-
-            this.sampleMapRenderer.EdgeMode = SampleMapEdgeMode.Mirror;
+            this.sampleMapRenderer.Properties.SampleMaps[i].Set(this.sampleMapEffects[i]);
         }
+
+        this.sampleMapRenderer.Properties.EdgeMode.SetValue(SampleMapEdgeMode.Mirror);
 
         return this.sampleMapRenderer;
     }
@@ -160,8 +156,8 @@ internal sealed partial class WaveyTransformEffect
 
         SampleMapShader sampleMapShader = new SampleMapShader(
             new float2(
-                (float)(1.0 / this.Environment.CanvasSize.Width),
-                (float)(1.0 / this.Environment.CanvasSize.Height)),
+                (float)(1.0 / this.Environment.Document.Size.Width),
+                (float)(1.0 / this.Environment.Document.Size.Height)),
             (float)scale);
 
         ReadOnlyMemory<byte> sampleMapConstantBuffer = D2D1PixelShader.GetConstantBuffer(sampleMapShader);

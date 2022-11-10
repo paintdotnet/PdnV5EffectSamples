@@ -92,7 +92,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        SizeInt32 size = this.Environment.CanvasSize;
+        SizeInt32 size = this.Environment.Document.Size;
         string text = this.Token.GetProperty<StringProperty>(PropertyNames.Text).Value;
         string fontName = (string)this.Token.GetProperty<StaticListChoiceProperty>(PropertyNames.FontName).Value;
         int fontSize = this.Token.GetProperty<Int32Property>(PropertyNames.FontSize).Value;

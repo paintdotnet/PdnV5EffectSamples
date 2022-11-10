@@ -176,7 +176,7 @@ internal sealed partial class NightCircuitShaderEffect
         for (int i = 0; i < this.subPixelOffsets!.Length; ++i)
         {
             float iTime = time / 30.0f;
-            float2 iResolution = new float2(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height);
+            float2 iResolution = new float2(this.Environment.Document.Size.Width, this.Environment.Document.Size.Height);
 
             this.pixelShaderEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,

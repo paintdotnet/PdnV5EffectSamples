@@ -60,8 +60,8 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
             D2D1PixelShaderEffectProperty.ConstantBuffer,
             D2D1PixelShader.GetConstantBuffer(new Shader(
                 new float3(
-                    this.Environment.CanvasSize.Width,
-                    this.Environment.CanvasSize.Height,
+                    this.Environment.Document.Size.Width,
+                    this.Environment.Document.Size.Height,
                     0),
                 (float)this.Token.GetProperty<DoubleProperty>(PropertyNames.Time).Value)));
 

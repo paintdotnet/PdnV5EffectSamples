@@ -163,13 +163,13 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     {
         double zoom = this.Token.GetProperty<DoubleProperty>(PropertyNames.FractalZoom).Value;
 
-        double radius = Math.Min(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height) * 0.5;
+        double radius = Math.Min(this.Environment.Document.Size.Width, this.Environment.Document.Size.Height) * 0.5;
         double radius2 = radius * radius;
         double polarInversionAmount = this.Token.GetProperty<DoubleProperty>(PropertyNames.PolarInversionAmount).Value;
         Vector2Double polarInversionOffset = this.Token.GetProperty<DoubleVectorProperty>(PropertyNames.PolarInversionOffset).Value;
         Vector2Double centerOffset = new Vector2Double(
-            this.Environment.CanvasSize.Width * (1.0 + polarInversionOffset.X) * 0.5,
-            this.Environment.CanvasSize.Height * (1.0 + polarInversionOffset.Y) * 0.5);
+            this.Environment.Document.Size.Width * (1.0 + polarInversionOffset.X) * 0.5,
+            this.Environment.Document.Size.Height * (1.0 + polarInversionOffset.Y) * 0.5);
 
         for (int i = 0; i < this.subPixelOffsets!.Length; ++i)
         {
@@ -185,12 +185,12 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
             this.sampleMapMirrorEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
                 D2D1PixelShader.GetConstantBuffer(new SampleMapMirrorShader(
-                    new float2(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height))));
+                    new float2(this.Environment.Document.Size.Width, this.Environment.Document.Size.Height))));
 
             this.mandelleavesShaderEffects![i].SetValue(
                 D2D1PixelShaderEffectProperty.ConstantBuffer,
                 D2D1PixelShader.GetConstantBuffer(new MandelleavesShader(
-                    new float2(this.Environment.CanvasSize.Width, this.Environment.CanvasSize.Height),
+                    new float2(this.Environment.Document.Size.Width, this.Environment.Document.Size.Height),
                     0,
                     (float)(1.0 / zoom))));
         }
