@@ -67,7 +67,6 @@ internal sealed partial class HueRotateEffect
         shaderEffect.SetInput(0, rgbToHueEffect);
         shaderEffect.SetValue(
             D2D1PixelShaderEffectProperty.ConstantBuffer,
-            PropertyType.Blob,
             D2D1PixelShader.GetConstantBuffer(new Shader((float)angle)));
 
         // 3. Convert from HSVA back to premultiplied RGBA.

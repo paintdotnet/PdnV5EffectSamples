@@ -111,7 +111,6 @@ internal sealed partial class HueRotateEffectAdvanced
         double angle = this.Token.GetProperty<DoubleProperty>(PropertyNames.Angle).Value;
         this.shaderEffect!.SetValue(
             D2D1PixelShaderEffectProperty.ConstantBuffer,
-            PropertyType.Blob,
             D2D1PixelShader.GetConstantBuffer(new Shader((float)angle)));
 
         base.OnUpdateOutput(deviceContext);
@@ -120,8 +119,8 @@ internal sealed partial class HueRotateEffectAdvanced
     [D2DInputCount(1)]
     [D2DInputSimple(0)]
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)] // This specifies the filter (sampling) for the input. Since we only read from the input at the same place we write to, point (nearest neighbor) is the right choice (and is fastest).
-    [AutoConstructor]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)] // This causes the shader to be compiled at compile time instead of runtime
+    [AutoConstructor]
     internal readonly partial struct Shader
         : ID2D1PixelShader
     {
