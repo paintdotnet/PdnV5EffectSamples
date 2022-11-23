@@ -201,7 +201,8 @@ internal sealed partial class WaveyTransformEffect
                 (cosU + sinV) * this.scale);
 
             // The return value from a sample map tells the SampleMapRenderer where to read from the input image.
-            // The format is (X, Y, A, 1), where (X, Y) is the sampling position, which is then multiplied by A.
+            // The format is (X, Y, A, 1), where (X, Y) is the sampling position. The color is the multiplied by
+            // A, which modulates its transparency.
             // Usually you should just set A to 1, but you can also use it to modulate the alpha/transparency of
             // the sampled pixel.
             // The sampled pixel will then be drawn at the current scene position.
