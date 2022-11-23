@@ -163,7 +163,7 @@ internal sealed partial class SquareBlurGpuEffect
             invalidOutput = InflateHelper(invalidInput, shader.radius, shader.radius);
         }
 
-        // This is a helper method that avoid overflow in the case where the rectangle is "logically infinite"
+        // This is a helper method that avoids overflow in the case where the rectangle is "logically infinite"
         // It's actually easy to have an "infinite" rect. Using FloodEffect will produce an image with an
         // infinite output rect, as will using BorderEffect. You can use CropEffect as another way to
         // constrain those output rects.
