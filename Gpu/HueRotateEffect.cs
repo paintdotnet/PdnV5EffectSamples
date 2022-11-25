@@ -23,7 +23,7 @@ internal sealed partial class HueRotateEffect
 {
     public HueRotateEffect()
         : base(
-            "Hue Rotate (GPU Sample)",
+            "Hue Rotate",
             "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {

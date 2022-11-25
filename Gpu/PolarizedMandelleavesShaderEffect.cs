@@ -26,7 +26,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
 {
     public PolarizedMandelleavesShaderEffect()
         : base(
-            "Polarized Mandelleaves (GPU Samples)",
+            "Polarized Mandelleaves",
             "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {

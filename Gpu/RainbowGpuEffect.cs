@@ -16,7 +16,7 @@ internal sealed class RainbowGpuEffect
 {
     public RainbowGpuEffect()
         : base(
-            "Rainbow (GPU Sample)",
+            "Rainbow",
             "PDN v5 Samples (GPU)",
             new GpuDrawingEffectOptions()
             {

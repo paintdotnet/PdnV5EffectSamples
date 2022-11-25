@@ -17,7 +17,7 @@ internal sealed class SquareBlurBitmapEffect
 
     public SquareBlurBitmapEffect()
         : base(
-            "Square Blur (Sample)",
+            "Square Blur",
             "PDN v5 Samples",
             new BitmapEffectOptions()
             {

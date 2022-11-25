@@ -25,7 +25,7 @@ internal sealed partial class WaveyTransformEffect
 {
     public WaveyTransformEffect()
         : base(
-            "Wavey Transform (GPU Sample)",
+            "Wavey Transform",
             "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {

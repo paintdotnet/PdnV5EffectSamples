@@ -29,7 +29,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
 {
     public OutlinedTextWithShadowGpuEffect()
         : base(
-            "Outlined Text with Shadow (GPU Sample)",
+            "Outlined Text with Shadow",
             "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {

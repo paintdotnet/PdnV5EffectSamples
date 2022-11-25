@@ -23,7 +23,7 @@ internal sealed partial class ZonePlateShaderEffect
 
     public ZonePlateShaderEffect()
         : base(
-            "Zone Plate Shader (GPU Sample)",
+            "Zone Plate Shader",
             "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {

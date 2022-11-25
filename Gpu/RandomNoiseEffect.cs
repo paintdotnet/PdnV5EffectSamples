@@ -20,7 +20,7 @@ internal sealed partial class RandomNoiseEffect
 {
     public RandomNoiseEffect()
         : base(
-            "Random Noise (GPU Sample)",
+            "Random Noise",
             "PDN v5 Samples (GPU)",
             new GpuImageEffectOptions()
             {
