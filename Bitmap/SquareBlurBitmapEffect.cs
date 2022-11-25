@@ -104,7 +104,7 @@ internal sealed class SquareBlurBitmapEffect
                 }
 
                 ColorPrgba128Float outputPrgba128F = ((ColorPrgba128Float)(samples / sampleCount));
-                ColorRgba128Float outputRgba128F = (ColorRgba128Float)outputPrgba128F;
+                ColorRgba128Float outputRgba128F = outputPrgba128F.ToUnpremultiplied();
                 ColorBgra32 outputBgra32 = ColorBgra32.Round(outputRgba128F);
                 outputRegion[outputDX, outputDY] = outputBgra32;
             }
