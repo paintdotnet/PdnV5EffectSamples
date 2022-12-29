@@ -39,7 +39,7 @@ internal sealed class GaussianBokehGpuEffect
         List<Property> properties = new List<Property>();
         properties.Add(new DoubleProperty(PropertyName.Radius, 10, 0, 250));
         properties.Add(new Int32Property(PropertyName.BokehQuality, 3, 1, 6));
-        properties.Add(new DoubleProperty(PropertyName.BokehGamma, 3, 0.01, 10.0));
+        properties.Add(new DoubleProperty(PropertyName.BokehGamma, 1, 0.01, 6.0));
         properties.Add(new DoubleProperty(PropertyName.CrossFade, 0.5, 0.0, 1.0));
         return new PropertyCollection(properties);
     }
@@ -49,24 +49,24 @@ internal sealed class GaussianBokehGpuEffect
         return InspectTokenAction.UpdateOutput;
     }
 
-    private GaussianBlurEffect? gaussianBlurEffect;
+    private GaussianBlurEffect2? gaussianBlurEffect;
     private PdnBokehEffect? bokehEffect;
     private CrossFadeEffect? crossFadeEffect;
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        this.gaussianBlurEffect = new GaussianBlurEffect(deviceContext);
+        this.gaussianBlurEffect = new GaussianBlurEffect2(deviceContext);
         this.gaussianBlurEffect.Properties.Input.Set(this.Environment.SourceImage);
         this.gaussianBlurEffect.Properties.BorderMode.SetValue(BorderMode.Hard);
-        this.gaussianBlurEffect.Properties.Optimization.SetValue(GaussianBlurOptimization.Quality);
+        this.gaussianBlurEffect.Properties.Optimization.SetValue(GaussianBlurOptimization2.Quality);
 
         this.bokehEffect = new PdnBokehEffect(deviceContext);
         this.bokehEffect.Properties.Input.Set(this.Environment.SourceImage);
         this.bokehEffect.Properties.EdgeMode.SetValue(PdnBokehEdgeMode.Clamp);
 
         this.crossFadeEffect = new CrossFadeEffect(deviceContext);
-        this.crossFadeEffect.Properties.Destination.Set(this.bokehEffect);
-        this.crossFadeEffect.Properties.Source.Set(this.gaussianBlurEffect);
+        this.crossFadeEffect.Properties.Destination.Set(this.gaussianBlurEffect);
+        this.crossFadeEffect.Properties.Source.Set(this.bokehEffect);
 
         return this.crossFadeEffect;
     }
@@ -82,7 +82,7 @@ internal sealed class GaussianBokehGpuEffect
         this.bokehEffect!.Properties.Radius.SetValue((float)radius);
         this.bokehEffect!.Properties.GammaExponent.SetValue((float)bokehGamma);
         this.bokehEffect!.Properties.Quality.SetValue(bokehQuality);
-        this.crossFadeEffect!.Properties.Weight.SetValue((float)crossFade);
+        this.crossFadeEffect!.Properties.SourceWeight.SetValue((float)crossFade);
 
         base.OnUpdateOutput(deviceContext);
     }
