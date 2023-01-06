@@ -10,9 +10,19 @@
          instead of copying the ones that Paint.NET is using (which may be trimmed and/or a different version) -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+    <Deterministic>False</Deterministic>
+    <AssemblyVersion>1.0.*</AssemblyVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CS7035</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CS7035</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.0-preview2" />
+    <!-- TODO: trimming and linking -->
+    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
     <!-- Be sure to set Private=False (aka CopyLocal=false) on the Paint.NET assemblies 
