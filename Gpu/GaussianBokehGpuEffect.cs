@@ -9,8 +9,9 @@ using System.Collections.Generic;
 namespace PaintDotNet.Effects.Samples.Gpu;
 
 // This sample uses both the Gaussian Blur and PDN's Bokeh blur effects and composes them together.
-// Using the CrossFade slider you can have all Gaussian, a mixture, or all Bokeh.
-// This isn't necessarily a useful effect, but illustrates some simple effect chaining and blending.
+// Using the CrossFade slider you can have all Gaussian (0), a mixture, or all Bokeh (1).
+// This isn't necessarily a useful effect, but illustrates some simple effect chaining and blending,
+// as well as using the ConvertGammaEffect for gamma-correct rendering.
 
 internal sealed class GaussianBokehGpuEffect
     : PropertyBasedGpuImageEffect
@@ -26,64 +27,70 @@ internal sealed class GaussianBokehGpuEffect
     {
     }
 
-    private enum PropertyName
+    private enum PropertyNames
     {
         Radius,
+        GaussianBlurQuality,
+        BokehQuality,
         CrossFade,
-        BokehGamma,
-        BokehQuality
     }
 
     protected override PropertyCollection OnCreatePropertyCollection()
     {
         List<Property> properties = new List<Property>();
-        properties.Add(new DoubleProperty(PropertyName.Radius, 10, 0, 250));
-        properties.Add(new Int32Property(PropertyName.BokehQuality, 3, 1, 6));
-        properties.Add(new DoubleProperty(PropertyName.BokehGamma, 3, 0.01, 10.0));
-        properties.Add(new DoubleProperty(PropertyName.CrossFade, 0.5, 0.0, 1.0));
+        properties.Add(new DoubleProperty(PropertyNames.Radius, 10, 0, 250));
+        properties.Add(new Int32Property(PropertyNames.GaussianBlurQuality, 3, 1, 4));
+        properties.Add(new Int32Property(PropertyNames.BokehQuality, 3, 1, 10));
+        properties.Add(new DoubleProperty(PropertyNames.CrossFade, 0.5, 0.0, 1.0));
         return new PropertyCollection(properties);
     }
 
-    protected override InspectTokenAction OnInspectTokenChanges(PropertyBasedEffectConfigToken oldToken, PropertyBasedEffectConfigToken newToken)
+    protected override ControlInfo OnCreateConfigUI(PropertyCollection props)
     {
-        return InspectTokenAction.UpdateOutput;
+        ControlInfo configUI = CreateDefaultConfigUI(props);
+        configUI.SetPropertyControlValue(PropertyNames.CrossFade, ControlInfoPropertyNames.DisplayName, "Cross-fade: Gaussian Blur (0) <--> Bokeh (1)");
+        return configUI;
     }
-
-    private GaussianBlurEffect? gaussianBlurEffect;
-    private PdnBokehEffect? bokehEffect;
-    private CrossFadeEffect? crossFadeEffect;
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        this.gaussianBlurEffect = new GaussianBlurEffect(deviceContext);
-        this.gaussianBlurEffect.Properties.Input.Set(this.Environment.SourceImage);
-        this.gaussianBlurEffect.Properties.BorderMode.SetValue(BorderMode.Hard);
-        this.gaussianBlurEffect.Properties.Optimization.SetValue(GaussianBlurOptimization.Quality);
+        double radius = this.Token.GetProperty<DoubleProperty>(PropertyNames.Radius).Value;
+        int gaussianBlurQuality = this.Token.GetProperty<Int32Property>(PropertyNames.GaussianBlurQuality).Value;
+        int bokehQuality = this.Token.GetProperty<Int32Property>(PropertyNames.BokehQuality).Value;
+        double crossFade = this.Token.GetProperty<DoubleProperty>(PropertyNames.CrossFade).Value;
 
-        this.bokehEffect = new PdnBokehEffect(deviceContext);
-        this.bokehEffect.Properties.Input.Set(this.Environment.SourceImage);
-        this.bokehEffect.Properties.EdgeMode.SetValue(PdnBokehEdgeMode.Clamp);
+        // The UI in Paint.NET for Gaussian Blur and Bokeh has a Gamma dropdown and Gamma Exponent slider.
+        // Those are implemented with the ConvertGammaEffect, which we use here but only for sRGB/Linear
+        // conversion, which ensures we do the blurring in a gamma-correct manner. All input images that
+        // come into effects are sRGB, except when the image has a color profile (which is currently
+        // ignored). Effect output is also treated as being sRGB, so we must convert back to it from
+        // linear at the end.
+        ConvertGammaEffect inputAsLinearEffect = new ConvertGammaEffect(deviceContext);
+        inputAsLinearEffect.Properties.Input.Set(this.Environment.SourceImage);
+        inputAsLinearEffect.Properties.Mode.SetValue(ConvertGammaMode.SrgbToLinear);
 
-        this.crossFadeEffect = new CrossFadeEffect(deviceContext);
-        this.crossFadeEffect.Properties.Destination.Set(this.bokehEffect);
-        this.crossFadeEffect.Properties.Source.Set(this.gaussianBlurEffect);
+        // Using GaussianBlurEffect "2" allows us to use GaussianBlurOptimization2.HighQuality
+        GaussianBlurEffect2 gaussianBlurEffect = new GaussianBlurEffect2(deviceContext);
+        gaussianBlurEffect.Properties.Input.Set(inputAsLinearEffect);
+        gaussianBlurEffect.Properties.BorderMode.SetValue(BorderMode.Hard);
+        // The property has a range of 1-4, but the enum values are 0-3, so we must subtract 1
+        gaussianBlurEffect.Properties.Optimization.SetValue((GaussianBlurOptimization2)(gaussianBlurQuality - 1));
+        gaussianBlurEffect!.Properties.StandardDeviation.SetValue((float)StandardDeviation.FromRadius(radius));
 
-        return this.crossFadeEffect;
-    }
+        PdnBokehEffect bokehEffect = new PdnBokehEffect(deviceContext);
+        bokehEffect.Properties.Input.Set(inputAsLinearEffect);
+        bokehEffect.Properties.Radius.SetValue((float)radius);
+        bokehEffect.Properties.Quality.SetValue(bokehQuality);
 
-    protected override void OnUpdateOutput(IDeviceContext deviceContext)
-    {
-        double radius = this.Token.GetProperty<DoubleProperty>(PropertyName.Radius).Value;
-        int bokehQuality = this.Token.GetProperty<Int32Property>(PropertyName.BokehQuality).Value;
-        double bokehGamma = this.Token.GetProperty<DoubleProperty>(PropertyName.BokehGamma).Value;
-        double crossFade = this.Token.GetProperty<DoubleProperty>(PropertyName.CrossFade).Value;
+        CrossFadeEffect crossFadeEffect = new CrossFadeEffect(deviceContext);
+        crossFadeEffect.Properties.Destination.Set(gaussianBlurEffect);
+        crossFadeEffect.Properties.Source.Set(bokehEffect);
+        crossFadeEffect.Properties.SourceWeight.SetValue((float)crossFade);
 
-        this.gaussianBlurEffect!.Properties.StandardDeviation.SetValue((float)StandardDeviation.FromRadius(radius));
-        this.bokehEffect!.Properties.Radius.SetValue((float)radius);
-        this.bokehEffect!.Properties.GammaExponent.SetValue((float)bokehGamma);
-        this.bokehEffect!.Properties.Quality.SetValue(bokehQuality);
-        this.crossFadeEffect!.Properties.Weight.SetValue((float)crossFade);
+        ConvertGammaEffect outputAsSrgbEffect = new ConvertGammaEffect(deviceContext);
+        outputAsSrgbEffect.Properties.Input.Set(crossFadeEffect);
+        outputAsSrgbEffect.Properties.Mode.SetValue(ConvertGammaMode.LinearToSrgb);
 
-        base.OnUpdateOutput(deviceContext);
+        return outputAsSrgbEffect;
     }
 }
