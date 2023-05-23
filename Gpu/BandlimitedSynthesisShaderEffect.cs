@@ -19,7 +19,7 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
         : base(
             "Bandlimited Synthesis Shader",
             "PDN v5 Samples (GPU)",
-            new GpuImageEffectOptions()
+            GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true
             })
@@ -38,6 +38,14 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
         properties.Add(new DoubleProperty(PropertyNames.Time, 0, 0, 100));
         properties.Add(new UriProperty(PropertyNames.Link, new Uri("https://www.shadertoy.com/view/WtScDt")));
         return new PropertyCollection(properties);
+    }
+
+    protected override void OnInitializeRenderInfo(IGpuImageEffectRenderInfo renderInfo)
+    {
+        // ShaderToy runs its shaders in sRGB (2.2) gamma space, so we match that here
+        renderInfo.ColorContext = GpuEffectColorContext.Srgb;
+
+        base.OnInitializeRenderInfo(renderInfo);
     }
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)

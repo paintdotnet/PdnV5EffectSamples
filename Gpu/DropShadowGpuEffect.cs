@@ -1,6 +1,7 @@
 ﻿using PaintDotNet.Direct2D1;
 using PaintDotNet.Direct2D1.Effects;
 using PaintDotNet.Effects.Gpu;
+using PaintDotNet.Imaging;
 using PaintDotNet.PropertySystem;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ internal sealed class DropShadowGpuEffect
         : base(
             "Drop Shadow",
             "PDN v5 Samples (GPU)",
-            new GpuImageEffectOptions()
+            GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true
             })

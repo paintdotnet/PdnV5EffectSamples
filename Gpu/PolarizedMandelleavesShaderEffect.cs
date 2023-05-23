@@ -28,7 +28,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
         : base(
             "Polarized Mandelleaves",
             "PDN v5 Samples (GPU)",
-            new GpuImageEffectOptions()
+            GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true
             })
@@ -66,6 +66,14 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
         configUI.SetPropertyControlValue(PropertyNames.FractalZoom, ControlInfoPropertyNames.UseExponentialScale, true);
 
         return configUI;
+    }
+
+    protected override void OnInitializeRenderInfo(IGpuImageEffectRenderInfo renderInfo)
+    {
+        // ShaderToy runs its shaders in sRGB (2.2) gamma space, so we match that here
+        renderInfo.ColorContext = GpuEffectColorContext.Srgb;
+
+        base.OnInitializeRenderInfo(renderInfo);
     }
 
     private Guid polarInversionEffectID;

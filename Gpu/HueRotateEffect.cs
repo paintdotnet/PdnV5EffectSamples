@@ -25,7 +25,7 @@ internal sealed partial class HueRotateEffect
         : base(
             "Hue Rotate",
             "PDN v5 Samples (GPU)",
-            new GpuImageEffectOptions()
+            GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true
             })

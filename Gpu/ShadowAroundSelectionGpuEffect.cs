@@ -21,7 +21,7 @@ internal sealed class ShadowAroundSelectionGpuEffect
         : base(
             "Shadow Around Selection",
             "PDN v5 Samples (GPU)",
-            new GpuImageEffectOptions()
+            GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true
             })
@@ -81,7 +81,7 @@ internal sealed class ShadowAroundSelectionGpuEffect
             // Note that we issue drawing commands to the deviceContext. The command list becomes
             // the device context's current "target" that receives the drawing commands.
 
-            ISolidColorBrush brush = deviceContext.CreateSolidColorBrush(Colors.Black);
+            ISolidColorBrush brush = deviceContext.CreateSolidColorBrush(LinearColors.Black);
             deviceContext.DrawGeometry(selectionGeometry, brush, blurRadius / 2.0f);
         }
 

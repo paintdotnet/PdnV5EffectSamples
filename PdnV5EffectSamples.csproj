@@ -22,7 +22,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- TODO: trimming and linking -->
-    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.0" />
+    <PackageReference Include="ComputeSharp.D2D1" Version="2.0.3" />
   </ItemGroup>
   <ItemGroup>
     <!-- Be sure to set Private=False (aka CopyLocal=false) on the Paint.NET assemblies 

@@ -24,7 +24,7 @@ internal sealed partial class SquareBlurGpuEffect
         : base(
             "Square Blur",
             "PDN v5 Samples (GPU)",
-            new GpuImageEffectOptions()
+            GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true
             })

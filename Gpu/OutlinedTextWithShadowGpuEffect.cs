@@ -31,7 +31,7 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         : base(
             "Outlined Text with Shadow",
             "PDN v5 Samples (GPU)",
-            new GpuImageEffectOptions()
+            GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true
             })
@@ -121,8 +121,8 @@ internal sealed class OutlinedTextWithShadowGpuEffect
         using (deviceContext.UseTarget(textImage))
         using (deviceContext.UseBeginDraw())
         {
-            ISolidColorBrush blackBrush = deviceContext.CreateSolidColorBrush(Colors.Black);
-            ISolidColorBrush whiteBrush = deviceContext.CreateSolidColorBrush(Colors.White);
+            ISolidColorBrush blackBrush = deviceContext.CreateSolidColorBrush(LinearColors.Black);
+            ISolidColorBrush whiteBrush = deviceContext.CreateSolidColorBrush(LinearColors.White);
 
             Point2Float centerPoint = new Point2Float(size.Width / 2.0f, size.Height / 2.0f);
             using (deviceContext.UseTransform(Matrix3x2Float.RotationAt((float)-rotationAngle, centerPoint)))
