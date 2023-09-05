@@ -27,6 +27,10 @@
   <ItemGroup>
     <!-- Be sure to set Private=False (aka CopyLocal=false) on the Paint.NET assemblies 
          so they are not copied to the output folder -->
+    <Reference Include="PaintDotNet.Base">
+      <HintPath>C:\Program Files\paint.net\PaintDotNet.Base.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="PaintDotNet.ComponentModel">
       <HintPath>C:\Program Files\paint.net\PaintDotNet.ComponentModel.dll</HintPath>
       <Private>False</Private>
