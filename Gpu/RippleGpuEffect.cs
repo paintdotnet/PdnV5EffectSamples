@@ -193,10 +193,9 @@ internal sealed partial class RippleGpuEffect
             //float lighting = Hlsl.Lerp(1.0f, 1.0f + wave.X * falloff * 0.2f, Hlsl.Saturate(this.amplitude / 20.0f));
             //sample.RGB *= lighting;
 
-            // The return value from a sample map shader is in the format (X,Y,A,*)
+            // The return value from a sample map shader is in the format (X,Y,*,A)
             // X and Y are the pixel to sample from, which is then multiplied by A (alpha)
-            // The fourth component of the return value is currently discarded, but in a later build it will be possible
-            // to pass that value into a post-processor (e.g. to apply the lighting value that's commented out above)
+            // The third component of the return value is currently discarded
             float2 samplePos = scenePos + inputOffset;
             return new float4(samplePos, 1, 1);
         }
