@@ -197,7 +197,7 @@ internal sealed partial class RippleGpuEffect
             // X and Y are the pixel to sample from, which is then multiplied by A (alpha)
             // The third component of the return value is currently discarded
             float2 samplePos = scenePos + inputOffset;
-            return new float4(samplePos, 1, 1);
+            return new float4(samplePos, 0, 1);
         }
     }
 }
