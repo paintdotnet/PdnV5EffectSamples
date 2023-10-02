@@ -47,7 +47,7 @@ internal sealed partial class SquareBlurGpuEffect
 
     protected override IDeviceImage OnCreateOutput(Direct2D1.IDeviceContext deviceContext)
     {
-        int radius = this.Token.GetProperty<Int32Property>(PropertyNames.Radius).Value;
+        int radius = this.Token.GetProperty<Int32Property>(PropertyNames.Radius)!.Value;
         if (radius == 0)
         {
             return this.Environment.SourceImage;

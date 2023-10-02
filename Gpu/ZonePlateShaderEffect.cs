@@ -67,7 +67,7 @@ internal sealed partial class ZonePlateShaderEffect
 
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
     {
-        double scale = this.Token.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
+        double scale = this.Token.GetProperty<DoubleProperty>(PropertyNames.Scale)!.Value;
         SizeInt32 sourceImageSize = this.Environment.Document.Size;
         double diameter = (Math.Min(sourceImageSize.Width, sourceImageSize.Height) & ~1) * scale;
         Shader shader = new Shader(new int2(sourceImageSize.Width, sourceImageSize.Height), (float)diameter);

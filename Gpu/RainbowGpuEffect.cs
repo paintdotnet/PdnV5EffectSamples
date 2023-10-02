@@ -42,7 +42,7 @@ internal sealed class RainbowGpuEffect
     protected override void OnDraw(IDeviceContext dc)
     {
         SizeInt32 size = this.Environment.Document.Size;
-        int hueOffset = this.Token.GetProperty<Int32Property>(PropertyNames.HueOffset).Value;
+        int hueOffset = this.Token.GetProperty<Int32Property>(PropertyNames.HueOffset)!.Value;
 
         // D2D1_GRADIENT_STOP: https://docs.microsoft.com/en-us/windows/win32/api/d2d1/ns-d2d1-d2d1_gradient_stop
         GradientStop[] gradientStops = new GradientStop[361];

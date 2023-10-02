@@ -54,10 +54,10 @@ internal sealed class GaussianBokehGpuEffect
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        double radius = this.Token.GetProperty<DoubleProperty>(PropertyNames.Radius).Value;
-        int gaussianBlurQuality = this.Token.GetProperty<Int32Property>(PropertyNames.GaussianBlurQuality).Value;
-        int bokehQuality = this.Token.GetProperty<Int32Property>(PropertyNames.BokehQuality).Value;
-        double crossFade = this.Token.GetProperty<DoubleProperty>(PropertyNames.CrossFade).Value;
+        double radius = this.Token.GetProperty<DoubleProperty>(PropertyNames.Radius)!.Value;
+        int gaussianBlurQuality = this.Token.GetProperty<Int32Property>(PropertyNames.GaussianBlurQuality)!.Value;
+        int bokehQuality = this.Token.GetProperty<Int32Property>(PropertyNames.BokehQuality)!.Value;
+        double crossFade = this.Token.GetProperty<DoubleProperty>(PropertyNames.CrossFade)!.Value;
 
         // Using GaussianBlurEffect "2" allows us to use GaussianBlurOptimization2.HighQuality
         GaussianBlurEffect2 gaussianBlurEffect = new GaussianBlurEffect2(deviceContext);
@@ -67,10 +67,11 @@ internal sealed class GaussianBokehGpuEffect
         gaussianBlurEffect.Properties.Optimization.SetValue((GaussianBlurOptimization2)(gaussianBlurQuality - 1));
         gaussianBlurEffect!.Properties.StandardDeviation.SetValue((float)StandardDeviation.FromRadius(radius));
 
-        PdnBokehEffect bokehEffect = new PdnBokehEffect(deviceContext);
+        BokehBlurEffect bokehEffect = new BokehBlurEffect(deviceContext);
         bokehEffect.Properties.Input.Set(this.Environment.SourceImage);
         bokehEffect.Properties.Radius.SetValue((float)radius);
         bokehEffect.Properties.Quality.SetValue(bokehQuality);
+        bokehEffect.Properties.EdgeMode.SetValue(BokehBlurEdgeMode.Mirror);
 
         CrossFadeEffect crossFadeEffect = new CrossFadeEffect(deviceContext);
         crossFadeEffect.Properties.Destination.Set(gaussianBlurEffect);

@@ -93,12 +93,12 @@ internal sealed class OutlinedTextWithShadowGpuEffect
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
         SizeInt32 size = this.Environment.Document.Size;
-        string text = this.Token.GetProperty<StringProperty>(PropertyNames.Text).Value;
-        string fontName = (string)this.Token.GetProperty<StaticListChoiceProperty>(PropertyNames.FontName).Value;
-        int fontSize = this.Token.GetProperty<Int32Property>(PropertyNames.FontSize).Value;
-        int outlineThickness = this.Token.GetProperty<Int32Property>(PropertyNames.OutlineThickness).Value;
-        double rotationAngle = this.Token.GetProperty<DoubleProperty>(PropertyNames.RotationAngle).Value;
-        int shadowBlurRadius = this.Token.GetProperty<Int32Property>(PropertyNames.ShadowBlurRadius).Value;
+        string text = this.Token.GetProperty<StringProperty>(PropertyNames.Text)!.Value;
+        string fontName = (string)this.Token.GetProperty<StaticListChoiceProperty>(PropertyNames.FontName)!.Value;
+        int fontSize = this.Token.GetProperty<Int32Property>(PropertyNames.FontSize)!.Value;
+        int outlineThickness = this.Token.GetProperty<Int32Property>(PropertyNames.OutlineThickness)!.Value;
+        double rotationAngle = this.Token.GetProperty<DoubleProperty>(PropertyNames.RotationAngle)!.Value;
+        int shadowBlurRadius = this.Token.GetProperty<Int32Property>(PropertyNames.ShadowBlurRadius)!.Value;
 
         IDirect2DFactory d2dFactory = this.Environment.Direct2DFactory;
         IDirectWriteFactory dwFactory = this.Environment.DirectWriteFactory;

@@ -144,13 +144,13 @@ internal sealed partial class RandomNoiseEffect
             D2D1PixelShaderEffectProperty.ConstantBuffer,
             D2D1PixelShader.GetConstantBuffer(shader));
 
-        ColorMode colorMode = (ColorMode)this.Token.GetProperty(PropertyNames.ColorMode).Value;
+        ColorMode colorMode = (ColorMode)this.Token.GetProperty(PropertyNames.ColorMode)!.Value!;
         this.coloredShaderEffect!.Properties.Index.SetValue((int)colorMode);
 
-        BlendMode blendMode = (BlendMode)this.Token.GetProperty(PropertyNames.BlendMode).Value;
+        BlendMode blendMode = (BlendMode)this.Token.GetProperty(PropertyNames.BlendMode)!.Value!;
         this.blendEffect!.Properties.Mode.SetValue(blendMode);
 
-        bool blending = this.Token.GetProperty<BooleanProperty>(PropertyNames.Blending).Value;
+        bool blending = this.Token.GetProperty<BooleanProperty>(PropertyNames.Blending)!.Value;
         this.outputEffect!.Properties.Index.SetValue(blending ? 1 : 0);
 
         base.OnUpdateOutput(deviceContext);

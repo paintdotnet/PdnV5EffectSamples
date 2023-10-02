@@ -71,7 +71,7 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
                     this.Environment.Document.Size.Width,
                     this.Environment.Document.Size.Height,
                     0),
-                (float)this.Token.GetProperty<DoubleProperty>(PropertyNames.Time).Value)));
+                (float)this.Token.GetProperty<DoubleProperty>(PropertyNames.Time)!.Value)));
 
         base.OnUpdateOutput(deviceContext);
     }

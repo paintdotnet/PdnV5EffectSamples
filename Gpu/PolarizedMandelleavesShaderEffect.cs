@@ -104,11 +104,11 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     {
         // If the Quality or InfiniteCoordinateSpace properties are changed, we need to rebuild the effect graph.
 
-        int oldQuality = oldToken.GetProperty<Int32Property>(PropertyNames.Quality).Value;
-        bool oldInfiniteCoordinateSpace = oldToken.GetProperty<BooleanProperty>(PropertyNames.InfiniteCoordinateSpace).Value;
+        int oldQuality = oldToken.GetProperty<Int32Property>(PropertyNames.Quality)!.Value;
+        bool oldInfiniteCoordinateSpace = oldToken.GetProperty<BooleanProperty>(PropertyNames.InfiniteCoordinateSpace)!.Value;
 
-        int newQuality = newToken.GetProperty<Int32Property>(PropertyNames.Quality).Value;
-        bool newInfiniteCoordinateSpace = newToken.GetProperty<BooleanProperty>(PropertyNames.InfiniteCoordinateSpace).Value;
+        int newQuality = newToken.GetProperty<Int32Property>(PropertyNames.Quality)!.Value;
+        bool newInfiniteCoordinateSpace = newToken.GetProperty<BooleanProperty>(PropertyNames.InfiniteCoordinateSpace)!.Value;
 
         return (oldQuality == newQuality && oldInfiniteCoordinateSpace == newInfiniteCoordinateSpace)
             ? InspectTokenAction.UpdateOutput
@@ -117,10 +117,10 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        int quality = this.Token.GetProperty<Int32Property>(PropertyNames.Quality).Value;
+        int quality = this.Token.GetProperty<Int32Property>(PropertyNames.Quality)!.Value;
         this.subPixelOffsets = EffectHelpers.GetRgssOffsets(quality);
 
-        bool infiniteCoordinateSpace = this.Token.GetProperty<BooleanProperty>(PropertyNames.InfiniteCoordinateSpace).Value;
+        bool infiniteCoordinateSpace = this.Token.GetProperty<BooleanProperty>(PropertyNames.InfiniteCoordinateSpace)!.Value;
 
         using CompositeEffect compositeEffect = new CompositeEffect(deviceContext);
         compositeEffect.InputCount = this.subPixelOffsets.Length;
@@ -169,12 +169,12 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
 
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
     {
-        double zoom = this.Token.GetProperty<DoubleProperty>(PropertyNames.FractalZoom).Value;
+        double zoom = this.Token.GetProperty<DoubleProperty>(PropertyNames.FractalZoom)!.Value;
 
         double radius = Math.Min(this.Environment.Document.Size.Width, this.Environment.Document.Size.Height) * 0.5;
         double radius2 = radius * radius;
-        double polarInversionAmount = this.Token.GetProperty<DoubleProperty>(PropertyNames.PolarInversionAmount).Value;
-        Vector2Double polarInversionOffset = this.Token.GetProperty<DoubleVectorProperty>(PropertyNames.PolarInversionOffset).Value;
+        double polarInversionAmount = this.Token.GetProperty<DoubleProperty>(PropertyNames.PolarInversionAmount)!.Value;
+        Vector2Double polarInversionOffset = this.Token.GetProperty<DoubleVectorProperty>(PropertyNames.PolarInversionOffset)!.Value;
         Vector2Double centerOffset = new Vector2Double(
             this.Environment.Document.Size.Width * (1.0 + polarInversionOffset.X) * 0.5,
             this.Environment.Document.Size.Height * (1.0 + polarInversionOffset.Y) * 0.5);

@@ -94,20 +94,20 @@ internal sealed partial class RippleGpuEffect
         double width = this.Environment.Document.Size.Width;
         double height = this.Environment.Document.Size.Height;
 
-        double size = this.Token.GetProperty<DoubleProperty>(PropertyNames.Size).Value;
+        double size = this.Token.GetProperty<DoubleProperty>(PropertyNames.Size)!.Value;
         double sizePx = size * (Math.Max(width, height) / 2.0);
 
-        double frequency = this.Token.GetProperty<DoubleProperty>(PropertyNames.Frequency).Value;
-        double phase = this.Token.GetProperty<DoubleProperty>(PropertyNames.Phase).Value;
-        double amplitude = this.Token.GetProperty<DoubleProperty>(PropertyNames.Amplitude).Value;
-        double spread = this.Token.GetProperty<DoubleProperty>(PropertyNames.Spread).Value;
+        double frequency = this.Token.GetProperty<DoubleProperty>(PropertyNames.Frequency)!.Value;
+        double phase = this.Token.GetProperty<DoubleProperty>(PropertyNames.Phase)!.Value;
+        double amplitude = this.Token.GetProperty<DoubleProperty>(PropertyNames.Amplitude)!.Value;
+        double spread = this.Token.GetProperty<DoubleProperty>(PropertyNames.Spread)!.Value;
 
-        Vector2Double center = this.Token.GetProperty<DoubleVectorProperty>(PropertyNames.Center).Value;
+        Vector2Double center = this.Token.GetProperty<DoubleVectorProperty>(PropertyNames.Center)!.Value;
         Point2Double centerPoint = new Point2Double(
             (width + (center.X * width)) / 2.0,
             (height + (center.Y * height)) / 2.0);
 
-        int quality = this.Token.GetProperty<Int32Property>(PropertyNames.Quality).Value;
+        int quality = this.Token.GetProperty<Int32Property>(PropertyNames.Quality)!.Value;
 
         // To implement multisampling, the ripple effect is run multiple times at various sampling offsets,
         // which are then blended together by the SampleMapRenderer to form the final high-quality output.

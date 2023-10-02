@@ -67,8 +67,8 @@ internal sealed partial class NightCircuitShaderEffect
 
     protected override InspectTokenAction OnInspectTokenChanges(PropertyBasedEffectConfigToken oldToken, PropertyBasedEffectConfigToken newToken)
     {
-        if (oldToken.GetProperty<Int32Property>(PropertyNames.Quality).Value != newToken.GetProperty<Int32Property>(PropertyNames.Quality).Value ||
-            oldToken.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict).Value != newToken.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict).Value)
+        if (oldToken.GetProperty<Int32Property>(PropertyNames.Quality)!.Value != newToken.GetProperty<Int32Property>(PropertyNames.Quality)!.Value ||
+            oldToken.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict)!.Value != newToken.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict)!.Value)
         {
             return InspectTokenAction.RecreateOutput;
         }
@@ -122,9 +122,9 @@ internal sealed partial class NightCircuitShaderEffect
         // Multisample Antialiasing (MSAA) is implemented by rendering the shader multiple times at various subpixel offsets
         // Each effect output is summed together using the CompositeEffect, then divided at the end with the MultiplyConstEffect
 
-        bool ieeeStrict = this.Token.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict).Value;
+        bool ieeeStrict = this.Token.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict)!.Value;
 
-        int quality = this.Token.GetProperty<Int32Property>(PropertyNames.Quality).Value;
+        int quality = this.Token.GetProperty<Int32Property>(PropertyNames.Quality)!.Value;
         this.subPixelOffsets = EffectHelpers.GetRgssOffsets(quality);
 
         // 'using' is fine and good here, because the IDeviceEffect.SetInput() method (see below when
@@ -178,8 +178,8 @@ internal sealed partial class NightCircuitShaderEffect
 
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
     {
-        int time = this.Token.GetProperty<Int32Property>(PropertyNames.Time).Value;
-        bool ieeeStrict = this.Token.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict).Value;
+        int time = this.Token.GetProperty<Int32Property>(PropertyNames.Time)!.Value;
+        bool ieeeStrict = this.Token.GetProperty<BooleanProperty>(PropertyNames.IeeeStrict)!.Value;
 
         for (int i = 0; i < this.subPixelOffsets!.Length; ++i)
         {

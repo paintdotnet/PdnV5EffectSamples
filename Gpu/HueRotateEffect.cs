@@ -53,7 +53,7 @@ internal sealed partial class HueRotateEffect
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        double angle = this.Token.GetProperty<DoubleProperty>(PropertyNames.Angle).Value;
+        double angle = this.Token.GetProperty<DoubleProperty>(PropertyNames.Angle)!.Value;
 
         // 1. Convert SourceImage from premultiplied RGBA to HSVA
         // Direct2D's RGB-to-Hue effect: https://docs.microsoft.com/en-us/windows/win32/direct2d/rgb-to-hue-effect

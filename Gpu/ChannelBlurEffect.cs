@@ -70,11 +70,11 @@ internal sealed class ChannelBlurEffect
 
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
     {
-        double radius = this.Token.GetProperty<DoubleProperty>(PropertyNames.Radius).Value;
-        bool red = this.Token.GetProperty<BooleanProperty>(PropertyNames.Red).Value;
-        bool green = this.Token.GetProperty<BooleanProperty>(PropertyNames.Green).Value;
-        bool blue = this.Token.GetProperty<BooleanProperty>(PropertyNames.Blue).Value;
-        bool alpha = this.Token.GetProperty<BooleanProperty>(PropertyNames.Alpha).Value;
+        double radius = this.Token.GetProperty<DoubleProperty>(PropertyNames.Radius)!.Value;
+        bool red = this.Token.GetProperty<BooleanProperty>(PropertyNames.Red)!.Value;
+        bool green = this.Token.GetProperty<BooleanProperty>(PropertyNames.Green)!.Value;
+        bool blue = this.Token.GetProperty<BooleanProperty>(PropertyNames.Blue)!.Value;
+        bool alpha = this.Token.GetProperty<BooleanProperty>(PropertyNames.Alpha)!.Value;
 
         this.blurEffect!.Properties.StandardDeviation.SetValue((float)StandardDeviation.FromRadius(radius));
 

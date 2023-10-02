@@ -77,7 +77,7 @@ internal sealed partial class WaveyTransformEffect
 
     private static int GetQualityFromToken(PropertyBasedEffectConfigToken token)
     {
-        return token.GetProperty<Int32Property>(PropertyNames.Quality).Value;
+        return token.GetProperty<Int32Property>(PropertyNames.Quality)!.Value;
     }
 
     protected override void OnSetDeviceContext(IDeviceContext deviceContext)
@@ -150,7 +150,7 @@ internal sealed partial class WaveyTransformEffect
 
     protected override void OnUpdateOutput(IDeviceContext deviceContext)
     {
-        double scale = this.Token.GetProperty<DoubleProperty>(PropertyNames.Scale).Value;
+        double scale = this.Token.GetProperty<DoubleProperty>(PropertyNames.Scale)!.Value;
         int quality = GetQualityFromToken(this.Token);
         int sampleCount = EffectHelpers.GetRgssOffsetsCount(quality);
 
@@ -201,8 +201,8 @@ internal sealed partial class WaveyTransformEffect
                 (cosU + sinV) * this.scale);
 
             // The return value from a sample map tells the SampleMapRenderer where to read from the input image.
-            // The format is (X, Y, A, 1), where (X, Y) is the sampling position. The color is the multiplied by
-            // A, which modulates its transparency.
+            // The format is (X, Y, *, A), where (X, Y) is the sampling position. The color is the multiplied by
+            // A, which modulates its transparency. The W component is unused.
             // Usually you should just set A to 1, but you can also use it to modulate the alpha/transparency of
             // the sampled pixel.
             // The sampled pixel will then be drawn at the current scene position.

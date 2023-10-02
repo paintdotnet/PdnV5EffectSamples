@@ -44,7 +44,7 @@ internal sealed class DropShadowGpuEffect
         // Set up a simple transform graph.
         // SourceImage is plugged into ShadowEffect, which will rendered the shadow.
         // Then, CompositeEffect, which is used as the output, is used to blend SourceImage on top of ShadowEffect.
-        int blurRadius = this.Token.GetProperty<Int32Property>(PropertyNames.BlurRadius).Value;
+        int blurRadius = this.Token.GetProperty<Int32Property>(PropertyNames.BlurRadius)!.Value;
 
         ShadowEffect shadowEffect = new ShadowEffect(deviceContext);
         shadowEffect.Properties.Input.Set(this.Environment.SourceImage);

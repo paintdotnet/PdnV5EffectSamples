@@ -46,7 +46,7 @@ internal sealed class SquareBlurBitmapEffect
 
     protected override void OnSetToken(PropertyBasedEffectConfigToken? newToken)
     {
-        this.radius = newToken!.GetProperty<Int32Property>(PropertyNames.Radius).Value;
+        this.radius = newToken!.GetProperty<Int32Property>(PropertyNames.Radius)!.Value;
         base.OnSetToken(newToken);
     }
 

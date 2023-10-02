@@ -108,7 +108,7 @@ internal sealed partial class HueRotateEffectAdvanced
         // and apply them to the effects in the effect graph. We cannot change the effect graph -- if we need to
         // do that, we need to return InspectTokenAction.RecreateOutput  from OnInspectTokenChanges().
 
-        double angle = this.Token.GetProperty<DoubleProperty>(PropertyNames.Angle).Value;
+        double angle = this.Token.GetProperty<DoubleProperty>(PropertyNames.Angle)!.Value;
         this.shaderEffect!.SetValue(
             D2D1PixelShaderEffectProperty.ConstantBuffer,
             D2D1PixelShader.GetConstantBuffer(new Shader((float)angle)));

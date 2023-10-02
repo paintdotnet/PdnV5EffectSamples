@@ -54,9 +54,9 @@ internal sealed class ShadowAroundSelectionGpuEffect
 
     protected override IDeviceImage OnCreateOutput(IDeviceContext deviceContext)
     {
-        bool insideSelection = this.Token.GetProperty<BooleanProperty>(PropertyNames.InsideSelection).Value;
-        bool outsideSelection = this.Token.GetProperty<BooleanProperty>(PropertyNames.OutsideSelection).Value;
-        int blurRadius = this.Token.GetProperty<Int32Property>(PropertyNames.BlurRadius).Value;
+        bool insideSelection = this.Token.GetProperty<BooleanProperty>(PropertyNames.InsideSelection)!.Value;
+        bool outsideSelection = this.Token.GetProperty<BooleanProperty>(PropertyNames.OutsideSelection)!.Value;
+        int blurRadius = this.Token.GetProperty<Int32Property>(PropertyNames.BlurRadius)!.Value;
         
         if (!insideSelection && !outsideSelection)
         {
