@@ -119,9 +119,6 @@ internal sealed partial class WaveyTransformEffect
 
         this.sampleMapRenderer = new SampleMapRenderer(deviceContext);
 
-        // Using an update transaction is optional, but helps performance since updating properties on the
-        // SampleMapRenderer can be expensive. Using a transaction allows it to defer its internal updates
-        // until the end of the transaction.
         this.sampleMapRenderer.Properties.Input.Set(this.Environment.SourceImage);
         this.sampleMapRenderer.Properties.SampleMaps.SetCount(sampleCount);
 

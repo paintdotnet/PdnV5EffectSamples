@@ -144,7 +144,7 @@ internal sealed partial class SquareBlurGpuEffect
         // state in this method. It's very important that this method is "functional" (as in functional
         // programming) in nature.
         // A shader can still try to read from outside the specified area, and no error/exception will
-        // occur, but but the result is undefined and will either be zero (transparent black), or some
+        // occur, but the result is undefined and will either be zero (transparent black), or some
         // random color.
         public void MapOutputToInputs(in Rectangle output, Span<Rectangle> inputs)
         {
@@ -159,7 +159,7 @@ internal sealed partial class SquareBlurGpuEffect
         {
             // NOTE: If the input image is "infinite", which will be the case when supplying (for example)
             // a Flood effect as the input, or an image with a Border[Effect] applied to it, then this
-            // will overflow. We can use RectInt64 to work around that. (TODO: show how!)
+            // will overflow. We use a helper method that employs RectInt64 to resolve that.
             invalidOutput = InflateHelper(invalidInput, shader.radius, shader.radius);
         }
 
@@ -181,6 +181,7 @@ internal sealed partial class SquareBlurGpuEffect
             // Clamp (intersect) the rectangle to the 32-bit "logically infinite" area, then cast do a 32-bit rectangle
             RectInt32 result = (RectInt32)RectInt64.Intersect(result64, RectInt32.LogicallyInfinite);
 
+            // Return result with implicit cast to System.Drawing.Rectangle
             return result;
         }
     }
