@@ -302,9 +302,9 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
         {
             float2 surfacePosition = 0.5f * (2.0f * fragCoord - this.iResolution.XY) / Hlsl.Min(this.iResolution.X, this.iResolution.Y);
 
-            //vec2 p = zoom * 2.0 * surfacePosition - vec2(0.7, 0.0);
+            //vec2 p = zoom * 2.0f * surfacePosition - vec2(0.7f, 0.0);
             float2 p = this.zoom * 0.016f * surfacePosition - new float2(0.805f, -0.176f);
-            //vec2 p = zoom * 0.001 * surfacePosition - vec2(1.924, 0.0);
+            //vec2 p = zoom * 0.001f * surfacePosition - vec2(1.924f, 0.0f);
 
             float2 z = p;
             float2 c = p;
@@ -317,7 +317,7 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
 
                 float a = Hlsl.Sin(this.iTime * 1.5f + i * 2.0f) * 0.3f + i * 1.3f;
                 float2 t = Hlsl.Mul(new float2x2(Hlsl.Cos(a), Hlsl.Sin(a), -Hlsl.Sin(a), Hlsl.Cos(a)), z);
-                if (Hlsl.Abs(t.X) > 2.0f && Hlsl.Abs(t.Y) > 2.0) 
+                if (Hlsl.Abs(t.X) > 2.0f && Hlsl.Abs(t.Y) > 2.0f) 
                 { 
                     it = i; 
                     break; 
