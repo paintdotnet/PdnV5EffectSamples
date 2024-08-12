@@ -14,11 +14,10 @@
     <Deterministic>False</Deterministic>
     <AssemblyVersion>1.0.*</AssemblyVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CS7035</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CS7035</NoWarn>
+  <PropertyGroup>
+    <!-- MSB3277 avoids build warnings about "conflicting" assembly references. These are extremely verbose, 
+         and ultimately pointless and unactionable. They are not important and can be ignored. -->
+    <NoWarn>1701;1702;CS7035;MSB3277</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AutoConstructor" Version="5.5.0">
