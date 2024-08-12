@@ -156,8 +156,9 @@ internal sealed partial class RippleGpuEffect
     [D2DInputSimple(0)]
     [D2DInputDescription(0, D2D1Filter.MinLinearMagMipPoint)]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
-    private readonly partial struct SampleMapShader
+    internal readonly partial struct SampleMapShader
         : ID2D1PixelShader
     {
         public readonly float size;

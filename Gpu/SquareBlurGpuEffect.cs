@@ -54,7 +54,7 @@ internal sealed partial class SquareBlurGpuEffect
         }
 
         deviceContext.Factory.RegisterEffectFromBlob(
-            D2D1PixelShaderEffect.GetRegistrationBlob<SquareBlurShader, SquareBlurTransformMapper>(out Guid effectID));
+            D2D1PixelShaderEffect.GetRegistrationBlob<SquareBlurShader>(out Guid effectID));
 
         IDeviceEffect shaderEffect = deviceContext.CreateEffect(effectID);
 
@@ -78,8 +78,10 @@ internal sealed partial class SquareBlurGpuEffect
     [D2DInputComplex(0)]
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)]
     [D2DRequiresScenePosition]
+    [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
-    private readonly partial struct SquareBlurShader
+    internal readonly partial struct SquareBlurShader
         : ID2D1PixelShader
     {
         // 'public' so that the transform mapper can read it
@@ -111,19 +113,21 @@ internal sealed partial class SquareBlurGpuEffect
     }
 
     private sealed class SquareBlurTransformMapper
-        : ID2D1TransformMapper<SquareBlurShader>
+        : D2D1DrawTransformMapper<SquareBlurShader>
     {
         private SquareBlurShader shader;
 
         // This method is called once each time the shader is rendered. We can store the shader and
         // access it later during the other methods.
-        public void MapInputsToOutput(
-            in SquareBlurShader shader, 
+        public override void MapInputsToOutput(
+            D2D1DrawInfoUpdateContext<SquareBlurShader> drawInfoUpdateContext, 
             ReadOnlySpan<Rectangle> inputs, 
             ReadOnlySpan<Rectangle> opaqueInputs, 
             out Rectangle output, 
             out Rectangle opaqueOutput)
         {
+            SquareBlurShader shader = drawInfoUpdateContext.GetConstantBuffer();
+
             // Store this so we can access it later. 
             this.shader = shader;
 
@@ -146,7 +150,7 @@ internal sealed partial class SquareBlurGpuEffect
         // A shader can still try to read from outside the specified area, and no error/exception will
         // occur, but the result is undefined and will either be zero (transparent black), or some
         // random color.
-        public void MapOutputToInputs(in Rectangle output, Span<Rectangle> inputs)
+        public override void MapOutputToInputs(in Rectangle output, Span<Rectangle> inputs)
         {
             // We need to read pixels from an area of +radius pixels around the output area
             inputs[0] = InflateHelper(output, this.shader.radius, this.shader.radius);
@@ -155,7 +159,7 @@ internal sealed partial class SquareBlurGpuEffect
         // This method is called _at least_ once each time the shader is rendered. We cannot modify our
         // state in this method. It's very important that this method is "functional" (as in functional
         // programming) in nature.
-        public void MapInvalidOutput(int inputIndex, Rectangle invalidInput, out Rectangle invalidOutput)
+        public override void MapInvalidOutput(int inputIndex, in Rectangle invalidInput, out Rectangle invalidOutput)
         {
             // NOTE: If the input image is "infinite", which will be the case when supplying (for example)
             // a Flood effect as the input, or an image with a Border[Effect] applied to it, then this

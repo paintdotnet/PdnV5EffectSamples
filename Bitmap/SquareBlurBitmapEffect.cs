@@ -6,13 +6,34 @@ using System.Collections.Generic;
 
 namespace PaintDotNet.Effects.Samples.Bitmap;
 
-// This is similar to SquareBlurGpuEffect, but implemented with CPU rendering via BitmapEffect
-// Note that this sample is not optimized for performance.
+// This is similar to SquareBlurGpuEffect, but implemented with CPU rendering via BitmapEffect.
+// This shows how to request the source image in Prgba128Float format and to produce output that
+// is also in Prgba128Float format. This accomplishes two things: 1) it converts the source image
+// to premultiplied alpha, which greatly simplifies the calculations we do here, and 2) it converts
+// the image to linear gamma, which greatly improves the quality of the result. The effect's
+// output will be automatically converted back to the format used by the image for storage (e.g.
+// currently always Bgra32, but will be expanded later).
+//
+// BitmapEffects that work with floating-point formats will automatically use linear gamma. The
+// input bitmaps will be linearized, and the output is assumed to be linearized. This covers
+// Rgba128Float, Prgba128Float, Rgba64Half, and Prgba64Half.
+//
+// BitmapEffects that work with integer formats will have neither of these conversions done, and
+// will operate much like you'd expect for "classic" effect plugins. This covers Bgra32, Pbgra32,
+// Rgba64, Prgba64, etc.
+//
+// Note that BGRA ordering is the convention for 32-bit pixel formats, while RGBA ordering is
+// the convention for everything else. You can use RGBA ordering if you want to, just specify the
+// appropriate pixel format.
+//
+// Note that this sample is not optimized for performance. Not only does it not use SIMD, but the
+// blur algorithm is not implemented as a separated kernel (that is, separate rendering passes for
+// horizontal and vertical blurring).
 
 internal sealed class SquareBlurBitmapEffect
     : PropertyBasedBitmapEffect
 {
-    private IBitmapSource<ColorBgra32>? sourceBitmap;
+    private IBitmapSource<ColorPrgba128Float>? sourceBitmap;
     private int radius;
 
     public SquareBlurBitmapEffect()
@@ -40,7 +61,8 @@ internal sealed class SquareBlurBitmapEffect
 
     protected override void OnInitializeRenderInfo(IBitmapEffectRenderInfo renderInfo)
     {
-        this.sourceBitmap = this.Environment.GetSourceBitmapBgra32();
+        renderInfo.OutputPixelFormat = PixelFormats.Prgba128Float;
+        this.sourceBitmap = this.Environment.GetSourceBitmap<ColorPrgba128Float>();
         base.OnInitializeRenderInfo(renderInfo);
     }
 
@@ -52,8 +74,8 @@ internal sealed class SquareBlurBitmapEffect
 
     protected override void OnRender(IBitmapEffectOutput output)
     {
-        using IBitmapLock<ColorBgra32> outputLock = output.LockBgra32();
-        RegionPtr<ColorBgra32> outputRegion = outputLock.AsRegionPtr();
+        using IBitmapLock<ColorPrgba128Float> outputLock = output.Lock<ColorPrgba128Float>();
+        RegionPtr<ColorPrgba128Float> outputRegion = outputLock.AsRegionPtr();
 
         int radius = this.radius;
         if (radius == 0)
@@ -67,7 +89,7 @@ internal sealed class SquareBlurBitmapEffect
         // Retrieve the region we need from the source bitmap. We clip the bitmap with the Clamp extend mode
         // so that we can access pixels "outside" the source without having a lot of messy bounds checking code
         RectInt32 sourceRect = RectInt32.Inflate(output.Bounds, this.radius, this.radius);
-        using IBitmap<ColorBgra32> sourceTile = this.sourceBitmap!
+        using IBitmap<ColorPrgba128Float> sourceTile = this.sourceBitmap!
             .CreateClipper(sourceRect, BitmapExtendMode.Clamp)
             .ToBitmap();
 
@@ -76,7 +98,7 @@ internal sealed class SquareBlurBitmapEffect
             return;
         }
 
-        using IBitmapLock<ColorBgra32> sourceTileLock = sourceTile.Lock(BitmapLockOptions.Read);
+        using IBitmapLock<ColorPrgba128Float> sourceTileLock = sourceTile.Lock(BitmapLockOptions.Read);
 
         // Get an offset view of the source so that x,y values are aligned with outputRegion
         var sourceRegion = sourceTileLock
@@ -98,15 +120,13 @@ internal sealed class SquareBlurBitmapEffect
                 {
                     for (int sourceX = outputDX - radius; sourceX <= outputDX + radius; ++sourceX)
                     {
-                        ColorBgra32 sample = sourceRegion[sourceX, sourceY];
-                        samples += (Vector4Float)(((ColorRgba128Float)sample).ToPremultiplied());
+                        ColorPrgba128Float sample = sourceRegion[sourceX, sourceY];
+                        samples += (Vector4Float)sample;
                     }
                 }
 
-                ColorPrgba128Float outputPrgba128F = ((ColorPrgba128Float)(samples / sampleCount));
-                ColorRgba128Float outputRgba128F = outputPrgba128F.ToUnpremultiplied();
-                ColorBgra32 outputBgra32 = ColorBgra32.Round(outputRgba128F);
-                outputRegion[outputDX, outputDY] = outputBgra32;
+                ColorPrgba128Float outputColor = (ColorPrgba128Float)(samples / sampleCount);
+                outputRegion[outputDX, outputDY] = outputColor;
             }
         }
     }

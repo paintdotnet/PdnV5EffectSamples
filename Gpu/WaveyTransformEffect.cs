@@ -177,8 +177,9 @@ internal sealed partial class WaveyTransformEffect
     [D2DInputSimple(0)]
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
-    private readonly partial struct SampleMapShader
+    internal readonly partial struct SampleMapShader
         : ID2D1PixelShader
     {
         private readonly float2 invImageSize;

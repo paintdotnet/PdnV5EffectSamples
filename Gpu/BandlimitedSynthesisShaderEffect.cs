@@ -80,8 +80,9 @@ internal sealed partial class BandlimitedSynthesisShaderEffect
     [D2DInputCount(0)]
     [D2DRequiresScenePosition]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
-    private readonly partial struct Shader
+    internal readonly partial struct Shader
         : ID2D1PixelShader
     {
         // The MIT License

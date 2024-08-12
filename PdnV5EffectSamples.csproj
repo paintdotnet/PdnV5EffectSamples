@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <RootNamespace>PaintDotNet.Effects.Samples</RootNamespace>
     <Nullable>enable</Nullable>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
@@ -13,7 +13,6 @@
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <Deterministic>False</Deterministic>
     <AssemblyVersion>1.0.*</AssemblyVersion>
-    <PdnRoot>C:\Program Files\paint.net</PdnRoot>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CS7035</NoWarn>
@@ -22,10 +21,19 @@
     <NoWarn>1701;1702;CS7035</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ComputeSharp.D2D1" Version="2.1.0" />
+    <PackageReference Include="AutoConstructor" Version="5.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="ComputeSharp.D2D1" Version="3.0.0-preview2" />
     <PackageReference Include="ILRepack" Version="2.0.18" />
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="8.0.100-1.23067.1" />
   </ItemGroup>
+  <PropertyGroup>
+    <!-- Set this to the location where you have Paint.NET installed. If you have the Microsoft
+         Store version, you should download the portable version and point this at that. -->
+    <PdnRoot>C:\Program Files\paint.net</PdnRoot>
+  </PropertyGroup>
   <ItemGroup>
     <!-- Be sure to set Private=False (aka CopyLocal=false) on the Paint.NET assemblies 
          so they are not copied to the output folder -->
