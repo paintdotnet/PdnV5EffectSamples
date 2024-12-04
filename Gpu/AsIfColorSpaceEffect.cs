@@ -25,7 +25,7 @@ internal sealed class AsIfColorSpaceEffect
     public AsIfColorSpaceEffect()
         : base(
             "As-if Color Space",
-            "PDN v5 Samples (GPU)",
+            "PDN v5.1 Samples (GPU)",
             GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true

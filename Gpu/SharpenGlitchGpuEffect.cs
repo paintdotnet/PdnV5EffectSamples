@@ -18,7 +18,7 @@ internal sealed class SharpenGlitchGpuEffect
     public SharpenGlitchGpuEffect()
         : base(
             "Sharpen Glitch",
-            "PDN v5 Samples (GPU)",
+            "PDN v5.1 Samples (GPU)",
             GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true

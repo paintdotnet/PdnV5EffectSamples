@@ -24,7 +24,7 @@ internal sealed partial class ZonePlateShaderEffect
     public ZonePlateShaderEffect()
         : base(
             "Zone Plate Shader",
-            "PDN v5 Samples (GPU)",
+            "PDN v5.1 Samples (GPU)",
             GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true

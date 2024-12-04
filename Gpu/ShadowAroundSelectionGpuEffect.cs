@@ -20,7 +20,7 @@ internal sealed class ShadowAroundSelectionGpuEffect
     public ShadowAroundSelectionGpuEffect()
         : base(
             "Shadow Around Selection",
-            "PDN v5 Samples (GPU)",
+            "PDN v5.1 Samples (GPU)",
             GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true

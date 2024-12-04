@@ -21,7 +21,7 @@ internal sealed partial class RandomNoiseEffect
     public RandomNoiseEffect()
         : base(
             "Random Noise",
-            "PDN v5 Samples (GPU)",
+            "PDN v5.1 Samples (GPU)",
             GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true

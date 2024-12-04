@@ -39,7 +39,7 @@ internal sealed class SquareBlurBitmapEffect
     public SquareBlurBitmapEffect()
         : base(
             "Square Blur",
-            "PDN v5 Samples",
+            "PDN v5.1 Samples",
             BitmapEffectOptions.Create() with
             {
                 IsConfigurable = true

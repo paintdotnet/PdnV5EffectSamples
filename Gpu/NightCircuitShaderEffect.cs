@@ -27,7 +27,7 @@ internal sealed partial class NightCircuitShaderEffect
     public NightCircuitShaderEffect()
         : base(
             "Night Circuit Shader",
-            "PDN v5 Samples (GPU)",
+            "PDN v5.1 Samples (GPU)",
             GpuImageEffectOptions.Create() with
             {
                 IsConfigurable = true
