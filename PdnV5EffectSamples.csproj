@@ -17,7 +17,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <Deterministic>False</Deterministic>
-    <AssemblyVersion>1.0.*</AssemblyVersion>
+    <AssemblyVersion>5.1.*</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup>
     <NoWarn>1701;1702;CS7035</NoWarn>
