@@ -20,7 +20,8 @@
     <AssemblyVersion>5.1.*</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <NoWarn>1701;1702;CS7035</NoWarn>
+    <!-- MSB3277 removes the harmless and unhelpful warning about assembly version "conflicts" (e.g. System.Runtime.Serialization.Formatters) -->
+    <NoWarn>1701;1702;CS7035;MSB3277</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AutoConstructor" Version="5.6.0">
@@ -32,7 +33,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.0"/>
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup>
     <!-- Be sure to set Private=False (aka CopyLocal=false) on the Paint.NET assemblies 
