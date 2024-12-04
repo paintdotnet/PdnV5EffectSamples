@@ -120,6 +120,7 @@ internal sealed partial class HueRotateEffectAdvanced
     [D2DInputSimple(0)]
     [D2DInputDescription(0, D2D1Filter.MinMagMipPoint)] // This specifies the filter (sampling) for the input. Since we only read from the input at the same place we write to, point (nearest neighbor) is the right choice (and is fastest).
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)] // This causes the shader to be compiled at compile time instead of runtime
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
     internal readonly partial struct Shader
         : ID2D1PixelShader

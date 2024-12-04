@@ -212,8 +212,9 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     [D2DOutputBuffer(D2D1BufferPrecision.Float32, D2D1ChannelDepth.Four)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking | D2D1CompileOptions.IeeeStrictness)]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
-    private readonly partial struct PolarInversionShader
+    internal readonly partial struct PolarInversionShader
         : ID2D1PixelShader
     {
         private readonly float2 centerOffset;
@@ -241,8 +242,9 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     [D2DOutputBuffer(D2D1BufferPrecision.Float32, D2D1ChannelDepth.Four)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking | D2D1CompileOptions.IeeeStrictness)]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
-    private readonly partial struct SampleMapMirrorShader
+    internal readonly partial struct SampleMapMirrorShader
         : ID2D1PixelShader
     {
         private readonly float2 size;
@@ -271,8 +273,9 @@ internal sealed partial class PolarizedMandelleavesShaderEffect
     [D2DRequiresScenePosition]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking | D2D1CompileOptions.IeeeStrictness)]
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
-    private readonly partial struct MandelleavesShader
+    internal readonly partial struct MandelleavesShader
         : ID2D1PixelShader
     {
         private readonly float2 iResolution;

@@ -12,7 +12,11 @@ The new effect system is split into two parts: `BitmapEffect`, which run on the 
   - This is implemented using `GpuImageEffect`: drawing commands are buffered into a Direct2D command list, which itself is an `IDeviceImage`.
 - `GpuEffect` is the lowest-level base class, allowing you to specify the Direct2D drawing commands separately for each rendered tile. This can be used to optimize performance in extreme scenarios where the number of drawing commands is high, and Direct2D's built-in clipping performance is not sufficient. However, this is rarely the case, and `GpuDrawingEffect` should be preferred for when you need to perform imperative drawing.
 
-Microsoft's has documentation for Direct2D effects, although some of it must be gleamed from their open-source Win2D project.
+Microsoft has documentation for Direct2D effects, although some of it must be gleamed from their open-source Win2D project.
 * Effects main page https://docs.microsoft.com/en-us/windows/win32/direct2d/effects-overview
 * Built-in effects https://docs.microsoft.com/en-us/windows/win32/direct2d/built-in-effects
 * Effect precision and clamping https://microsoft.github.io/Win2D/WinUI2/html/EffectPrecision.htm
+
+API reference for Paint.NET's built-in effect library
+* [`PaintDotNet.Direct2D1.Effects`](https://paintdotnet.github.io/apidocs/api/PaintDotNet.Direct2D1.Effects.html) - Wrappers for Direct2D's built-in effects. Also includes some variants on them (e.g. [`GaussianBlurEffect2`](https://paintdotnet.github.io/apidocs/api/PaintDotNet.Direct2D1.Effects.GaussianBlurEffect2.html)), and some originals (e.g. [`MedianBlurEffect`](https://paintdotnet.github.io/apidocs/api/PaintDotNet.Direct2D1.Effects.MedianBlurEffect.html), [`MixEffect`](https://paintdotnet.github.io/apidocs/api/PaintDotNet.Direct2D1.Effects.MixEffect.html)).
+* [`PaintDotNet.Effects.Gpu`](https://paintdotnet.github.io/apidocs/api/PaintDotNet.Effects.Gpu.html) - All of Paint.NET's built-in effects are UI wrappers around a corresponding Direct2D custom effect, and plugins have access to all of them in this namespace.

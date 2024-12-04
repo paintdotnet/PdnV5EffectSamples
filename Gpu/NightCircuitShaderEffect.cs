@@ -202,8 +202,9 @@ internal sealed partial class NightCircuitShaderEffect
     [D2DRequiresScenePosition]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking)]
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
-    private partial struct IeeeRelaxedShader
+    internal readonly partial struct IeeeRelaxedShader
         : ID2D1PixelShader
     {
         // TODO: bug in ComputeSharp means I have to have a copy of this const over here, not just in ShaderImpl. https://github.com/Sergio0694/ComputeSharp/issues/298
@@ -211,7 +212,7 @@ internal sealed partial class NightCircuitShaderEffect
         private static readonly float TAU = Hlsl.Atan(1.0f) * 8.0f;
 
         // Standard input constants for ShaderToy shaders
-        private float iTime;
+        private readonly float iTime;
         private readonly float2 iResolution;
 
         // This Execute() method adapts ShaderToy's mainImage() to work with ComputeSharp.D2D1's expected method signature
@@ -229,8 +230,9 @@ internal sealed partial class NightCircuitShaderEffect
     [D2DRequiresScenePosition]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader50)]
     [D2DCompileOptions(D2D1CompileOptions.Default | D2D1CompileOptions.EnableLinking | D2D1CompileOptions.IeeeStrictness)]
+    [D2DGeneratedPixelShaderDescriptor]
     [AutoConstructor]
-    private partial struct IeeeStrictShader
+    internal readonly partial struct IeeeStrictShader
         : ID2D1PixelShader
     {
         // TODO: bug in ComputeSharp means I have to have a copy of this const over here, not just in ShaderImpl. https://github.com/Sergio0694/ComputeSharp/issues/298
@@ -238,7 +240,7 @@ internal sealed partial class NightCircuitShaderEffect
         private static readonly float TAU = Hlsl.Atan(1.0f) * 8.0f;
 
         // Standard input constants for ShaderToy shaders
-        private float iTime;
+        private readonly float iTime;
         private readonly float2 iResolution;
 
         // This Execute() method adapts ShaderToy's mainImage() to work with ComputeSharp.D2D1's expected method signature
