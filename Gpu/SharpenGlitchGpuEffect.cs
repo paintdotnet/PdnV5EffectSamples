@@ -81,7 +81,7 @@ internal sealed class SharpenGlitchGpuEffect
         output.Properties.Sharpness.SetValue((float)amount);
         output.Properties.Threshold.SetValue((float)threshold);
 
-        for (int i = 1; i <= iterations; ++i)
+        for (int i = 1; i < iterations; ++i)
         {
             SharpenEffect sharpen = new SharpenEffect(deviceContext);
             sharpen.Properties.Input.Set(output);
