@@ -15,26 +15,25 @@
     <AssemblyVersion>1.0.*</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <!-- MSB3277 avoids build warnings about "conflicting" assembly references. These are extremely verbose, 
-         and ultimately pointless and unactionable. They are not important and can be ignored. -->
-    <NoWarn>1701;1702;CS7035;MSB3277</NoWarn>
+    <NoWarn>1701;1702;CS7035</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AutoConstructor" Version="5.5.0">
+    <PackageReference Include="AutoConstructor" Version="5.6.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="ComputeSharp.D2D1" Version="3.0.1" />
-    <PackageReference Include="ILRepack" Version="2.0.34">
+    <PackageReference Include="ILRepack" Version="2.0.35">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.0-preview.6.24327.7" />
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.0" />
   </ItemGroup>
   <PropertyGroup>
     <!-- Set this to the location where you have Paint.NET installed. If you have the Microsoft
          Store version, you should download the portable version and point this at that. -->
-    <PdnRoot>C:\Program Files\paint.net</PdnRoot>
+    <!--<PdnRoot>C:\Program Files\paint.net</PdnRoot>-->
+    <PdnRoot>d:\src\pdn\src\paintdotnet\bin\release</PdnRoot>
   </PropertyGroup>
   <ItemGroup>
     <!-- Be sure to set Private=False (aka CopyLocal=false) on the Paint.NET assemblies 
@@ -89,13 +88,13 @@
     </Reference>
   </ItemGroup>
   <PropertyGroup>
-    <illink>C:\Users\rick\.nuget\packages\microsoft.net.illink.tasks\8.0.100-1.23067.1\tools\net7.0\illink.dll</illink>
+    <illink>C:\Users\Rick\.nuget\packages\microsoft.net.illink.tasks\9.0.0-rc.2.24473.5\tools\net9.0\illink.dll</illink>
   </PropertyGroup>
   <Target Name="TrimAndMerge" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)' == 'Release'">
     <!-- Trimming with ILLink -->
     <Exec Command="dotnet exec &quot;$(illink)&quot; -a &quot;$(TargetPath)&quot; all --trim-mode copy --action copy -d $(TargetDir) --skip-unresolved --action link &quot;ComputeSharp.Core&quot; --action link &quot;ComputeShare.D2D1&quot; -out &quot;$(TargetDir)output&quot;" />
-    <!-- Merge with ILRepack -->
-    <Exec Command="C:\Users\rick\.nuget\packages\ilrepack\2.0.18\tools\ilrepack /internalize /union &quot;$(TargetDir)output\$(TargetName).dll&quot; &quot;$(TargetDir)output\ComputeSharp.Core.dll&quot; &quot;$(TargetDir)output\ComputeSharp.D2D1.dll&quot; /lib:&quot;$(PdnRoot)&quot; /out:&quot;$(TargetPath)&quot;" />
+    <!-- Merge with ILRepack. TODO: find env variable for nuget packages path https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files -->
+    <Exec Command="C:\Users\rick\.nuget\packages\ilrepack\2.0.35\tools\ilrepack /internalize /union &quot;$(TargetDir)output\$(TargetName).dll&quot; &quot;$(TargetDir)output\ComputeSharp.Core.dll&quot; &quot;$(TargetDir)output\ComputeSharp.D2D1.dll&quot; /lib:&quot;$(PdnRoot)&quot; /out:&quot;$(TargetPath)&quot;" />
     <!-- Remove the output directory and its contents created by illink -->
     <Delete Files="$(TargetDir)output" ContinueOnError="false" />
     <RemoveDir Directories="$(TargetDir)output" ContinueOnError="false" />
