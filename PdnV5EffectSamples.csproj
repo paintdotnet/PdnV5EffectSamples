@@ -1,10 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- Set this to the location where you have Paint.NET installed. If you have the Microsoft
-         Store version, you should download the portable version and point this at that. -->
-    <PdnRoot>C:\Program Files\paint.net</PdnRoot>
-  </PropertyGroup>
-  <PropertyGroup>
     <TargetFramework>net11.0-windows</TargetFramework>
     <RootNamespace>PaintDotNet.Effects.Samples</RootNamespace>
     <Nullable>enable</Nullable>
@@ -20,81 +15,56 @@
     <AssemblyVersion>5.2.*</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <!-- MSB3277 removes the harmless and unhelpful warning about assembly version "conflicts" (e.g. System.Runtime.Serialization.Formatters) -->
-    <NoWarn>1701;1702;CS7035;MSB3277</NoWarn>
+    <NoWarn>1701;1702;CS7035</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="PaintDotNet.Plugins.Sdk" Version="*-*" />
     <PackageReference Include="AutoConstructor" Version="5.6.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="ComputeSharp.D2D1" Version="3.0.1" />
-    <PackageReference Include="ILRepack" Version="2.0.35">
+    <PackageReference Include="ComputeSharp.D2D1" Version="3.2.0" />
+    <PackageReference Include="ILRepack" Version="2.0.48">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.0" />
   </ItemGroup>
-  <ItemGroup>
-    <!-- Be sure to set Private=False (aka CopyLocal=false) on the Paint.NET assemblies 
-         so they are not copied to the output folder -->
-    <Reference Include="PaintDotNet.Base">
-      <HintPath>$(PdnRoot)\PaintDotNet.Base.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.ComponentModel">
-      <HintPath>$(PdnRoot)\PaintDotNet.ComponentModel.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.Core">
-      <HintPath>$(PdnRoot)\PaintDotNet.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.Effects.Core">
-      <HintPath>$(PdnRoot)\PaintDotNet.Effects.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.Effects.Gpu">
-      <HintPath>$(PdnRoot)\PaintDotNet.Effects.Gpu.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.Fundamentals">
-      <HintPath>$(PdnRoot)\PaintDotNet.Fundamentals.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.Framework">
-      <HintPath>$(PdnRoot)\PaintDotNet.Framework.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.Primitives">
-      <HintPath>$(PdnRoot)\PaintDotNet.Primitives.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.PropertySystem">
-      <HintPath>$(PdnRoot)\PaintDotNet.PropertySystem.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.Windows">
-      <HintPath>$(PdnRoot)\PaintDotNet.Windows.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.Windows.Core">
-      <HintPath>$(PdnRoot)\PaintDotNet.Windows.Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="PaintDotNet.Windows.Framework">
-      <HintPath>$(PdnRoot)\PaintDotNet.Windows.Framework.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
   <Target Name="TrimAndMerge" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)' == 'Release'">
     <!-- Nuget documentation for $(PkgPackage_Name) properties: https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files -->
-    
+
+    <!-- Find the folder that NuGet resolved the Paint.NET reference assemblies from. This follows the
+         package's TFM folder (e.g. ref\net11.0-windows7.0) without hard-coding it, so it keeps working
+         when TargetFramework or the package version changes. -->
+    <ItemGroup>
+      <_PdnPluginsSdkReference Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)' == 'PaintDotNet.Plugins.Sdk'" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_PdnPluginsSdkRefDir>%(_PdnPluginsSdkReference.RootDir)%(_PdnPluginsSdkReference.Directory)</_PdnPluginsSdkRefDir>
+      <_PdnPluginsSdkRefDir>$(_PdnPluginsSdkRefDir.TrimEnd('\'))</_PdnPluginsSdkRefDir>
+    </PropertyGroup>
+    <Error Condition="'$(_PdnPluginsSdkRefDir)' == ''" Text="Could not find the PaintDotNet.Plugins.Sdk reference assemblies among the resolved references." />
+
     <!-- Trimming with ILLink -->
-    <Exec Command="dotnet exec &quot;$(PkgMicrosoft_NET_ILLink_Tasks)\tools\net9.0\illink.dll&quot; -a &quot;$(TargetPath)&quot; all --trim-mode copy --action copy -d $(TargetDir) --skip-unresolved --action link &quot;ComputeSharp.Core&quot; --action link &quot;ComputeShare.D2D1&quot; -out &quot;$(TargetDir)output&quot;" />
+
+    <!-- Find illink.dll inside the Microsoft.NET.ILLink.Tasks package. Each version of the package has
+         exactly one, but the name of the folder it sits in changes between versions (tools\net8.0,
+         tools\net9.0, tools\net, ...), so it is located with a wildcard instead of being hard-coded. -->
+    <ItemGroup>
+      <_ILLinkDll Include="$(PkgMicrosoft_NET_ILLink_Tasks)\tools\*\illink.dll" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_ILLinkDllPath>@(_ILLinkDll)</_ILLinkDllPath>
+    </PropertyGroup>
+    <Error Condition="'$(_ILLinkDllPath)' == '' Or $(_ILLinkDllPath.Contains(';'))" Text="Expected exactly one illink.dll under '$(PkgMicrosoft_NET_ILLink_Tasks)\tools', found: '$(_ILLinkDllPath)'" />
+
+    <Exec Command="dotnet exec &quot;$(_ILLinkDllPath)&quot; -a &quot;$(TargetPath)&quot; all --trim-mode copy --action copy -d $(TargetDir) --skip-unresolved --action link &quot;ComputeSharp.Core&quot; --action link &quot;ComputeSharp.D2D1&quot; -out &quot;$(TargetDir)output&quot;" />
+
+    <!-- Merge with ILRepack so we have only 1 DLL --> 
     
-    <!-- Merge with ILRepack. -->
-    <Exec Command="&quot;$(PkgILRepack)\tools\ilrepack&quot; /internalize /union &quot;$(TargetDir)output\$(TargetName).dll&quot; &quot;$(TargetDir)output\ComputeSharp.Core.dll&quot; &quot;$(TargetDir)output\ComputeSharp.D2D1.dll&quot; /lib:&quot;$(PdnRoot)&quot; /out:&quot;$(TargetPath)&quot;" />
+    <!-- The /lib directories let ILRepack resolve the Paint.NET reference assemblies and the 
+         ComputeSharp assemblies while it reads the inputs. -->
+    <Exec Command="&quot;$(PkgILRepack)\tools\ilrepack&quot; /internalize /union &quot;$(TargetDir)output\$(TargetName).dll&quot; &quot;$(TargetDir)output\ComputeSharp.Core.dll&quot; &quot;$(TargetDir)output\ComputeSharp.D2D1.dll&quot; /lib:&quot;$(_PdnPluginsSdkRefDir)&quot; /lib:&quot;$(TargetDir)output&quot; /out:&quot;$(TargetPath)&quot;" />
     
     <!-- Remove the output directory and its contents created by illink -->
     <Delete Files="$(TargetDir)output" ContinueOnError="false" />
@@ -103,5 +73,8 @@
     <!-- Remove ComputeSharp DLLs that are now merged -->
     <Delete Files="$(TargetDir)ComputeSharp.Core.dll" ContinueOnError="false" />
     <Delete Files="$(TargetDir)ComputeSharp.D2D1.dll" ContinueOnError="false" />
+
+    <!-- And because we have a single DLL now, we can remove the .deps.json -->
+    <Delete Files="$(TargetDir)PdnV5EffectSamples.deps.json" ContinueOnError="false" />
   </Target>
 </Project>
