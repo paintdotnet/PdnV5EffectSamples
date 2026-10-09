@@ -3,9 +3,6 @@
     <TargetFramework>net11.0-windows</TargetFramework>
     <RootNamespace>PaintDotNet.Effects.Samples</RootNamespace>
     <Nullable>enable</Nullable>
-    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-    <UseWindowsForms>true</UseWindowsForms>
-    <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <Deterministic>False</Deterministic>
