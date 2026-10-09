@@ -24,6 +24,11 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="11.0.*-*" />
   </ItemGroup>
+  
+  <!-- This <Target> node is optional. The DLLs used are trimmed and then merged into a single DLL. If 
+       you don't do this then you'll need to distribute your plugin DLLs and .deps.json file in a ZIP 
+       file that must be unpacked into its own folder. If everything is in one DLL then you don't need 
+       the folder or the deps.json file.-->
   <Target Name="TrimAndMerge" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)' == 'Release'">
     <!-- Nuget documentation for $(PkgPackage_Name) properties: https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files -->
 
@@ -59,7 +64,7 @@
       <_ILLinkRefDir Include="$([System.IO.Path]::GetDirectoryName('%(ReferencePath.FullPath)'))" />
     </ItemGroup>
     <PropertyGroup>
-      <_ILLinkRefDirArgs>@(_ILLinkRefDir->Distinct()->'-d &quot;%(Identity)&quot;', ' ')</_ILLinkRefDirArgs>
+      <_ILLinkRefDirArgs>@(_ILLinkRefDir-&gt;Distinct()-&gt;'-d "%(Identity)"', ' ')</_ILLinkRefDirArgs>
     </PropertyGroup>
 
     <!-- Referenced assemblies are only resolved, never written out ('skip'); the plugin itself is copied
