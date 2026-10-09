@@ -16,7 +16,7 @@
     <NoWarn>1701;1702;CS7035</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="PaintDotNet.Plugins.Sdk" Version="*-*" />
+    <PackageReference Include="PaintDotNet.Plugin.Sdk" Version="*-*" />
     <PackageReference Include="AutoConstructor" Version="5.6.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -35,13 +35,13 @@
          package's TFM folder (e.g. ref\net11.0-windows7.0) without hard-coding it, so it keeps working
          when TargetFramework or the package version changes. -->
     <ItemGroup>
-      <_PdnPluginsSdkReference Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)' == 'PaintDotNet.Plugins.Sdk'" />
+      <_PdnPluginSdkReference Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)' == 'PaintDotNet.Plugin.Sdk'" />
     </ItemGroup>
     <PropertyGroup>
-      <_PdnPluginsSdkRefDir>%(_PdnPluginsSdkReference.RootDir)%(_PdnPluginsSdkReference.Directory)</_PdnPluginsSdkRefDir>
-      <_PdnPluginsSdkRefDir>$(_PdnPluginsSdkRefDir.TrimEnd('\'))</_PdnPluginsSdkRefDir>
+      <_PdnPluginSdkRefDir>%(_PdnPluginSdkReference.RootDir)%(_PdnPluginSdkReference.Directory)</_PdnPluginSdkRefDir>
+      <_PdnPluginSdkRefDir>$(_PdnPluginSdkRefDir.TrimEnd('\'))</_PdnPluginSdkRefDir>
     </PropertyGroup>
-    <Error Condition="'$(_PdnPluginsSdkRefDir)' == ''" Text="Could not find the PaintDotNet.Plugins.Sdk reference assemblies among the resolved references." />
+    <Error Condition="'$(_PdnPluginSdkRefDir)' == ''" Text="Could not find the PaintDotNet.Plugin.Sdk reference assemblies among the resolved references." />
 
     <!-- Trimming with ILLink -->
 
@@ -74,7 +74,7 @@
     
     <!-- The /lib directories let ILRepack resolve the Paint.NET reference assemblies and the 
          ComputeSharp assemblies while it reads the inputs. -->
-    <Exec Command="&quot;$(PkgILRepack)\tools\ilrepack&quot; /internalize /union &quot;$(TargetDir)output\$(TargetName).dll&quot; &quot;$(TargetDir)output\ComputeSharp.Core.dll&quot; &quot;$(TargetDir)output\ComputeSharp.D2D1.dll&quot; /lib:&quot;$(_PdnPluginsSdkRefDir)&quot; /lib:&quot;$(TargetDir)output&quot; /out:&quot;$(TargetPath)&quot;" />
+    <Exec Command="&quot;$(PkgILRepack)\tools\ilrepack&quot; /internalize /union &quot;$(TargetDir)output\$(TargetName).dll&quot; &quot;$(TargetDir)output\ComputeSharp.Core.dll&quot; &quot;$(TargetDir)output\ComputeSharp.D2D1.dll&quot; /lib:&quot;$(_PdnPluginSdkRefDir)&quot; /lib:&quot;$(TargetDir)output&quot; /out:&quot;$(TargetPath)&quot;" />
     
     <!-- Remove the output directory and its contents created by illink -->
     <Delete Files="$(TargetDir)output" ContinueOnError="false" />
