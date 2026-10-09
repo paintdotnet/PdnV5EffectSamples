@@ -45,9 +45,9 @@
 
     <!-- Trimming with ILLink -->
 
-    <!-- Find illink.dll inside the Microsoft.NET.ILLink.Tasks package. Each version of the package has
-         exactly one, but the name of the folder it sits in changes between versions (tools\net8.0,
-         tools\net9.0, tools\net, ...), so it is located with a wildcard instead of being hard-coded. -->
+    <!-- Find illink.dll inside the Microsoft.NET.ILLink.Tasks package. The name of the folder can change 
+         between versions (tools\net8.0, tools\net9.0, tools\net, ...), so it is located with a wildcard
+         instead of being hard-coded. -->
     <ItemGroup>
       <_ILLinkDll Include="$(PkgMicrosoft_NET_ILLink_Tasks)\tools\*\illink.dll" />
     </ItemGroup>
@@ -58,8 +58,7 @@
 
     <!-- ILLink must be able to resolve everything the trimmed assemblies reference, including the framework.
          It removes any custom attribute whose type it cannot resolve, and that includes layout-affecting
-         ones such as [InlineArray], which silently corrupts struct sizes. The directories of the resolved
-         compile-time references are exactly the right search set. -->
+         ones such as [InlineArray], which silently corrupts struct sizes. -->
     <ItemGroup>
       <_ILLinkRefDir Include="$([System.IO.Path]::GetDirectoryName('%(ReferencePath.FullPath)'))" />
     </ItemGroup>
