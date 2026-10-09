@@ -28,7 +28,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="9.0.0" />
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="11.0.*-*" />
   </ItemGroup>
   <Target Name="TrimAndMerge" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)' == 'Release'">
     <!-- Nuget documentation for $(PkgPackage_Name) properties: https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files -->
@@ -58,7 +58,7 @@
     </PropertyGroup>
     <Error Condition="'$(_ILLinkDllPath)' == '' Or $(_ILLinkDllPath.Contains(';'))" Text="Expected exactly one illink.dll under '$(PkgMicrosoft_NET_ILLink_Tasks)\tools', found: '$(_ILLinkDllPath)'" />
 
-    <Exec Command="dotnet exec &quot;$(_ILLinkDllPath)&quot; -a &quot;$(TargetPath)&quot; all --trim-mode copy --action copy -d $(TargetDir) --skip-unresolved --action link &quot;ComputeSharp.Core&quot; --action link &quot;ComputeSharp.D2D1&quot; -out &quot;$(TargetDir)output&quot;" />
+    <Exec Command="dotnet exec &quot;$(_ILLinkDllPath)&quot; -a &quot;$(TargetName)&quot; all --trim-mode copy --action copy -d $(TargetDir) --skip-unresolved --action link &quot;ComputeSharp.Core&quot; --action link &quot;ComputeSharp.D2D1&quot; -out &quot;$(TargetDir)output&quot;" />
 
     <!-- Merge with ILRepack so we have only 1 DLL --> 
     
