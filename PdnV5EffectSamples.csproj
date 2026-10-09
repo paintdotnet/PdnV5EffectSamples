@@ -6,10 +6,14 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <Deterministic>False</Deterministic>
+    
+    <!-- Specifying * for the 3rd field will cause the compiler to auto-generate the build (3rd field)
+         and revision (4th field) based on the current date and time. This removes the need for you to
+         manually update the version every time you release a new build. For some reason the compiler 
+         will also warn about this with CS7035, so that is suppressed. -->
     <AssemblyVersion>5.2.*</AssemblyVersion>
-  </PropertyGroup>
-  <PropertyGroup>
-    <NoWarn>1701;1702;CS7035</NoWarn>
+    <NoWarn>CS7035</NoWarn>
+
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="PaintDotNet.Plugin.Sdk" Version="*-*" />
