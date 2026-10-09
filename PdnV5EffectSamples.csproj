@@ -5,7 +5,7 @@
     <PdnRoot>C:\Program Files\paint.net</PdnRoot>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net11.0-windows</TargetFramework>
     <RootNamespace>PaintDotNet.Effects.Samples</RootNamespace>
     <Nullable>enable</Nullable>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
@@ -17,7 +17,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <Deterministic>False</Deterministic>
-    <AssemblyVersion>5.1.*</AssemblyVersion>
+    <AssemblyVersion>5.2.*</AssemblyVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- MSB3277 removes the harmless and unhelpful warning about assembly version "conflicts" (e.g. System.Runtime.Serialization.Formatters) -->
