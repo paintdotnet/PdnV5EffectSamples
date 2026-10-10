@@ -19,7 +19,7 @@
   <ItemGroup>
     <!-- Use *-* for the plugin SDK reference so that the latest version is always used. This makes sure 
          you always have the latest APIs available, and that deprecated APIs are not accidentally used. -->
-    <PackageReference Include="PaintDotNet.Plugin.Sdk" Version="*-*" />
+    <PackageReference Include="PaintDotNet.Plugin.SDK" Version="*-*" />
     
     <PackageReference Include="ComputeSharp.D2D1" Version="3.2.0" />
     <PackageReference Include="AutoConstructor" Version="5.6.0">
@@ -44,13 +44,13 @@
          package's TFM folder (e.g. ref\net11.0-windows7.0) without hard-coding it, so it keeps working
          when TargetFramework or the package version changes. -->
     <ItemGroup>
-      <_PdnPluginSdkReference Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)' == 'PaintDotNet.Plugin.Sdk'" />
+      <_PdnPluginSdkReference Include="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)' == 'PaintDotNet.Plugin.SDK'" />
     </ItemGroup>
     <PropertyGroup>
       <_PdnPluginSdkRefDir>%(_PdnPluginSdkReference.RootDir)%(_PdnPluginSdkReference.Directory)</_PdnPluginSdkRefDir>
       <_PdnPluginSdkRefDir>$(_PdnPluginSdkRefDir.TrimEnd('\'))</_PdnPluginSdkRefDir>
     </PropertyGroup>
-    <Error Condition="'$(_PdnPluginSdkRefDir)' == ''" Text="Could not find the PaintDotNet.Plugin.Sdk reference assemblies among the resolved references." />
+    <Error Condition="'$(_PdnPluginSdkRefDir)' == ''" Text="Could not find the PaintDotNet.Plugin.SDK reference assemblies among the resolved references." />
 
     <!-- Trimming with ILLink -->
 
