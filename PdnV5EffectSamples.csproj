@@ -17,7 +17,10 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <!-- Use *-* for the plugin SDK reference so that the latest version is always used. This makes sure 
+         you always have the latest APIs available, and that deprecated APIs are not accidentally used. -->
     <PackageReference Include="PaintDotNet.Plugin.Sdk" Version="*-*" />
+    
     <PackageReference Include="ComputeSharp.D2D1" Version="3.2.0" />
     <PackageReference Include="AutoConstructor" Version="5.6.0">
       <PrivateAssets>all</PrivateAssets>
