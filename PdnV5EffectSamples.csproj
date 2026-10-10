@@ -5,34 +5,34 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+    <!-- Set up AssemblyFileVersion so the Build and Revision fields are auto-generated based on the
+         local time. This removes the need for you to manually update the version every time you
+         release a new update for your plugin. The FileVersion element doesn't accept wildcards, so
+         it is the more static "product" version. -->
+    <FileVersion>5.2</FileVersion>
+    <AssemblyVersion>$(FileVersion).*</AssemblyVersion>
+    <!-- Deterministic build is not allowed when using a wildcard version. -->
     <Deterministic>False</Deterministic>
-    
-    <!-- Specifying * for the 3rd field will cause the compiler to auto-generate the build (3rd field)
-         and revision (4th field) based on the current date and time. This removes the need for you to
-         manually update the version every time you release a new build. For some reason the compiler 
-         will also warn about this with CS7035, so that is suppressed. -->
-    <AssemblyVersion>5.2.*</AssemblyVersion>
-    <NoWarn>CS7035</NoWarn>
-
   </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="PaintDotNet.Plugin.Sdk" Version="*-*" />
+    <PackageReference Include="ComputeSharp.D2D1" Version="3.2.0" />
     <PackageReference Include="AutoConstructor" Version="5.6.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="ComputeSharp.D2D1" Version="3.2.0" />
+    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="11.0.*-*" />
     <PackageReference Include="ILRepack" Version="2.0.48">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="11.0.*-*" />
   </ItemGroup>
   
-  <!-- This <Target> node is optional. The DLLs used are trimmed and then merged into a single DLL. If 
-       you don't do this then you'll need to distribute your plugin DLLs and .deps.json file in a ZIP 
-       file that must be unpacked into its own folder. If everything is in one DLL then you don't need 
-       the folder or the deps.json file.-->
+  <!-- This <Target> element is optional. The DLLs used are trimmed and then merged into a single DLL. 
+       If you don't do this then you'll need to distribute your plugin DLLs and .deps.json file in a 
+       ZIP file that must be unpacked into its own folder. If everything is in one DLL then you don't 
+       need the folder or the deps.json file.-->
   <Target Name="TrimAndMerge" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)' == 'Release'">
     <!-- Nuget documentation for $(PkgPackage_Name) properties: https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files -->
 
