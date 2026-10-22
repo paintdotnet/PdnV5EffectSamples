@@ -81,10 +81,6 @@
     <Delete Files="$(TargetDir)output" ContinueOnError="false" />
     <RemoveDir Directories="$(TargetDir)output" ContinueOnError="false" />
     
-    <!-- Remove ComputeSharp DLLs that are now merged -->
-    <Delete Files="$(TargetDir)ComputeSharp.Core.dll" ContinueOnError="false" />
-    <Delete Files="$(TargetDir)ComputeSharp.D2D1.dll" ContinueOnError="false" />
-
     <!-- And because we have a single DLL now, we can remove the .deps.json -->
     <Delete Files="$(TargetDir)$(AssemblyName).deps.json" ContinueOnError="false" />
   </Target>
