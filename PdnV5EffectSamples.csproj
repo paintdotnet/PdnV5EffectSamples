@@ -28,11 +28,12 @@
   </ItemGroup>
 
   <!-- Trimming and Merging -->
-
   <!-- This step is optional. The plugin DLL and its dependencies are trimmed and then merged into a single 
        DLL. If you don't do this then you'll need to distribute your plugin DLLs and .deps.json file in a 
        ZIP file that must be unpacked into its own folder. If everything is in one DLL then you don't need 
        the folder or the deps.json file.-->
+
+  <!-- Packages used for trimming and merging -->
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="11.0.*-*" />
     <PackageReference Include="ILRepack" Version="2.0.48">
@@ -40,6 +41,15 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+  
+  <!-- Trimming opt-out List -->
+  <!-- Every DLL that your NuGet packages bring in (including their own dependencies) is found automatically,
+       trimmed, and merged into your plugin's DLL. Trimming removes unused code, but it can break libraries
+       that rely on reflection. List those here by assembly name to merge them without trimming. -->
+  <ItemGroup>
+    <!-- <PluginNoTrim Include="Newtonsoft.Json" /> -->
+  </ItemGroup>
+  
   <Target Name="TrimAndMerge" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)' == 'Release'">
     <!-- Nuget documentation for $(PkgPackage_Name) properties: https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files -->
 
@@ -66,16 +76,28 @@
       <_ILLinkRefDirArgs>@(_ILLinkRefDir-&gt;Distinct()-&gt;'-d "%(Identity)"', ' ')</_ILLinkRefDirArgs>
     </PropertyGroup>
 
-    <!-- Referenced assemblies are only resolved, never written out ('skip'). The plugin itself is copied
-         through untouched, and only the two ComputeSharp assemblies are trimmed. -->
-    <Exec Command="dotnet exec &quot;$(_ILLinkDllPath)&quot; -a &quot;$(TargetName)&quot; all --trim-mode skip --action skip --action copy &quot;$(TargetName)&quot; --action link &quot;ComputeSharp.Core&quot; --action link &quot;ComputeSharp.D2D1&quot; -d &quot;$(TargetDir.TrimEnd('\'))&quot; $(_ILLinkRefDirArgs) --skip-unresolved -out &quot;$(TargetDir)output&quot;" />
+    <!-- The assemblies to merge are the runtime DLLs from your NuGet packages, including transitive
+         dependencies. Native DLLs and localized resource DLLs can't be merged, so they're excluded. Each
+         one is trimmed ('link') unless it's listed in @(PluginNoTrim), in which case it is copied as-is. -->
+    <ItemGroup>
+      <_MergeAssemblyName Include="@(RuntimeCopyLocalItems-&gt;'%(Filename)')" Condition="'%(RuntimeCopyLocalItems.AssetType)' == 'runtime'" />
+      <_TrimAssemblyName Include="@(_MergeAssemblyName)" Exclude="@(PluginNoTrim)" />
+      <_NoTrimAssemblyName Include="@(_MergeAssemblyName)" Exclude="@(_TrimAssemblyName)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <_ILLinkActionArgs>@(_TrimAssemblyName-&gt;'--action link "%(Identity)"', ' ') @(_NoTrimAssemblyName-&gt;'--action copy "%(Identity)"', ' ')</_ILLinkActionArgs>
+      <_ILRepackInputArgs>@(_MergeAssemblyName-&gt;'"$(TargetDir)output\%(Identity).dll"', ' ')</_ILRepackInputArgs>
+    </PropertyGroup>
+
+    <!-- Everything else is only resolved, never written out ('skip'). The plugin itself is not trimmed. -->
+    <Exec Command="dotnet exec &quot;$(_ILLinkDllPath)&quot; -a &quot;$(TargetName)&quot; all --trim-mode skip --action skip --action copy &quot;$(TargetName)&quot; $(_ILLinkActionArgs) -d &quot;$(TargetDir.TrimEnd('\'))&quot; $(_ILLinkRefDirArgs) --skip-unresolved -out &quot;$(TargetDir)output&quot;" />
 
     <!-- Merge with ILRepack so we have only 1 DLL --> 
     
-    <!-- The /lib directories let ILRepack resolve the Paint.NET reference assemblies and the
-         ComputeSharp assemblies while it reads the inputs. $(PdnPluginSdkRefDir) is defined by the
+    <!-- The /lib directories let ILRepack resolve the Paint.NET reference assemblies and the merged
+         assemblies while it reads the inputs. $(PdnPluginSdkRefDir) is defined by the
          Paint.NET.Plugin.SDK package. -->
-    <Exec Command="&quot;$(PkgILRepack)\tools\ilrepack&quot; /internalize /union &quot;$(TargetDir)output\$(TargetName).dll&quot; &quot;$(TargetDir)output\ComputeSharp.Core.dll&quot; &quot;$(TargetDir)output\ComputeSharp.D2D1.dll&quot; /lib:&quot;$(PdnPluginSdkRefDir)&quot; /lib:&quot;$(TargetDir)output&quot; /out:&quot;$(TargetPath)&quot;" />
+    <Exec Command="&quot;$(PkgILRepack)\tools\ilrepack&quot; /internalize /union &quot;$(TargetDir)output\$(TargetName).dll&quot; $(_ILRepackInputArgs) /lib:&quot;$(PdnPluginSdkRefDir)&quot; /lib:&quot;$(TargetDir)output&quot; /out:&quot;$(TargetPath)&quot;" />
     
     <!-- Remove the output directory and its contents created by illink -->
     <Delete Files="$(TargetDir)output" ContinueOnError="false" />
